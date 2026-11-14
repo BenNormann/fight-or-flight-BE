@@ -1,0 +1,14 @@
+# secrets
+.env
+*.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# data + training artifacts (regenerate with the scripts)
+data/*.db
+models/artifacts/dataset.parquet
