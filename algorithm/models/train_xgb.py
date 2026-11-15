@@ -1,15 +1,15 @@
 """Train, evaluate and save the cell-hour crime-risk model.
 
-Usage (from the repo root, after data.ingest_crime):
-    python -m models.train_xgb                    # any reported incident
-    python -m models.train_xgb --target violent   # violent incidents only
-    python -m models.train_xgb --skip-sklearn     # skip the slower sklearn baseline
+Usage (from the repo root, after algorithm.data.ingest_crime):
+    python -m algorithm.models.train_xgb                    # any reported incident
+    python -m algorithm.models.train_xgb --target violent   # violent incidents only
+    python -m algorithm.models.train_xgb --skip-sklearn     # skip the slower sklearn baseline
 
 Split is by time, never random:
     train  2020-04 .. 2022-06   (first 90 days are feature warm-up)
     valid  2022-07 .. 2022-12   (early stopping only)
-    test   2023 full grid       (every cell x hour x day, no sampling)
-    extra  2024 full grid       (out-of-time check; LAPD reporting changed in 2024)
+    test   2023                 (all positives + weighted negative sample = full grid in expectation)
+    extra  2024                 (out-of-time check; LAPD reporting changed in 2024)
 
 Outputs (models/artifacts/): xgb_risk.ubj, model_meta.json, metrics.json,
 and plots + model_report.md in notebooks/.
@@ -25,7 +25,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xgboost as xgb
-from sklearn.calibration import calibration_curve
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
 
@@ -39,20 +38,40 @@ def prior_correct(p, neg_rate):
     return p * neg_rate / (p * neg_rate + (1 - p))
 
 
-def evaluate(y, p, name, probabilistic=True):
-    order = np.argsort(-p)
-    top10 = order[: max(1, len(p) // 10)]
+def weighted_quantiles(x, w, qs):
+    o = np.argsort(x)
+    cw = np.cumsum(w[o]) / w.sum()
+    return np.interp(qs, cw, x[o])
+
+
+def calibration_bins(y, p, w, n_bins=10):
+    """Weighted reliability curve with equal-weight (quantile) bins."""
+    edges = weighted_quantiles(p, w, np.linspace(0, 1, n_bins + 1))
+    b = np.clip(np.searchsorted(edges, p, side="right") - 1, 0, n_bins - 1)
+    mean_pred = [float(np.average(p[b == i], weights=w[b == i])) for i in range(n_bins) if (b == i).any()]
+    observed = [float(np.average(y[b == i], weights=w[b == i])) for i in range(n_bins) if (b == i).any()]
+    return mean_pred, observed
+
+
+def evaluate(y, p, name, w=None, probabilistic=True):
+    """Metrics on an evaluation frame. `w` are the frame's sample weights, so
+    the numbers equal what the full cell x hour x day grid would give."""
+    w = np.ones(len(y)) if w is None else np.asarray(w, dtype=float)
+    o = np.argsort(-p)
+    cw = np.cumsum(w[o])
+    top10 = o[: np.searchsorted(cw, 0.10 * cw[-1]) + 1]
     m = {
         "rows": int(len(y)),
-        "base_rate": float(y.mean()),
-        "auc": float(roc_auc_score(y, p)),
-        "pr_auc": float(average_precision_score(y, p)),
+        "grid_rows": float(w.sum()),
+        "base_rate": float(np.average(y, weights=w)),
+        "auc": float(roc_auc_score(y, p, sample_weight=w)),
+        "pr_auc": float(average_precision_score(y, p, sample_weight=w)),
         # share of all incident cell-hours that land in the riskiest 10% of cell-hours
-        "top10pct_capture": float(y[top10].sum() / max(1, y.sum())),
+        "top10pct_capture": float((y[top10] * w[top10]).sum() / max(1, (y * w).sum())),
     }
     if probabilistic:
-        m["brier"] = float(brier_score_loss(y, p))
-        m["mean_pred"] = float(p.mean())
+        m["brier"] = float(brier_score_loss(y, p, sample_weight=w))
+        m["mean_pred"] = float(np.average(p, weights=w))
     print(f"  {name:<28} AUC {m['auc']:.3f}  PR-AUC {m['pr_auc']:.4f}  "
           f"(base {m['base_rate']:.4f})  top-10% capture {m['top10pct_capture']:.1%}")
     return m
@@ -70,8 +89,9 @@ def main():
     frame, neg_rate, base_rate = hist.training_frame(kind=args.target)
     vday = hist.day_index(dt.date.fromisoformat(config.VALID_START))
     tr, va = frame[frame["day"] < vday], frame[frame["day"] >= vday]
+    print(f"{len(hist.cells):,} covered cells ({len(hist.no_data_cells):,} in the circle have no LAPD data)")
     print(f"Train {len(tr):,} rows ({int(tr.y.sum()):,} pos), valid {len(va):,} rows; "
-          f"neg sample rate {neg_rate:.3f}")
+          f"neg sample rate {neg_rate:.4f}")
 
     # ---- XGBoost ------------------------------------------------------------
     model = xgb.XGBClassifier(
@@ -93,48 +113,51 @@ def main():
         gbc.fit(sub[FEATURES], sub["y"])
         print(f"sklearn GBC trained on {len(sub):,} rows ({time.time() - t1:.0f}s)")
 
-    # ---- Evaluate on full out-of-time grids ----------------------------------
+    # ---- Evaluate out of time (weighted samples = full grid in expectation) ----
     metrics = {"target": args.target, "neg_rate": neg_rate, "train_base_rate": base_rate,
                "best_iteration": int(model.best_iteration)}
     test_probs = None
     for split, (a, b) in {"test_2023": (config.TEST_START, config.TEST_END),
                           "extra_2024": (config.EXTRA_START, config.EXTRA_END)}.items():
-        g = hist.frame_for_range(a, b, kind=args.target)
-        y = g["y"].to_numpy()
-        print(f"{split}: {len(g):,} cell-hours, {int(y.sum()):,} with an incident")
+        g, _, _ = hist.eval_frame(a, b, kind=args.target)
+        y, w = g["y"].to_numpy(), g["w"].to_numpy()
+        print(f"{split}: {w.sum():,.0f} cell-hours on the grid, {int(y.sum()):,} with an incident "
+              f"(scored {len(g):,} rows)")
         p = prior_correct(model.predict_proba(g[FEATURES])[:, 1], neg_rate)
-        res = {"xgboost": evaluate(y, p, "XGBoost")}
+        res = {"xgboost": evaluate(y, p, "XGBoost", w)}
         if gbc is not None:
             pg = prior_correct(gbc.predict_proba(g[FEATURES])[:, 1], neg_rate)
-            res["sklearn_gbc"] = evaluate(y, pg, "sklearn GradientBoosting")
-        # Naive baseline: rank by last-365-day count in that cell at that hour +/-1
+            res["sklearn_gbc"] = evaluate(y, pg, "sklearn GradientBoosting", w)
+        # Naive baseline: rank by last-12-month count in that cell at that hour +/-1
         res["baseline_hourband"] = evaluate(
             y, g["cell_hourband_365d"].to_numpy() + 1e-3 * g["cell_90d"].to_numpy(),
-            "Baseline (past-year count)", probabilistic=False)
+            "Baseline (past-year count)", w, probabilistic=False)
         # Heatmap-level check: does the model rank (cell, hour-of-day) slots the
         # way the year actually played out? Spearman of mean predicted risk vs
         # observed incident count per cell x hour over the whole split.
-        slot = pd.DataFrame({"c": g["cell_idx"], "h": g["hour"], "p": p, "y": y})
-        slot = slot.groupby(["c", "h"]).agg(p=("p", "mean"), y=("y", "sum"))
+        slot = pd.DataFrame({"c": g["cell_idx"], "h": g["hour"], "pw": p * w, "y": y})
+        slot = slot.groupby(["c", "h"]).agg(p=("pw", "sum"), y=("y", "sum"))
         res["xgboost"]["heatmap_spearman"] = float(slot["p"].corr(slot["y"], method="spearman"))
         print(f"  heatmap rank correlation (cell x hour-of-day, Spearman): "
               f"{res['xgboost']['heatmap_spearman']:.3f}")
-        frac, mean_pred = calibration_curve(y, p, n_bins=10, strategy="quantile")
-        res["xgboost"]["calibration"] = {"mean_pred": mean_pred.tolist(), "observed": frac.tolist()}
+        mean_pred, observed = calibration_bins(y, p, w)
+        res["xgboost"]["calibration"] = {"mean_pred": mean_pred, "observed": observed}
         metrics[split] = res
         if split == "test_2023":
-            test_probs, test_frame = p, g
+            test_probs, test_w, test_frame = p, w, g
 
     # ---- Save model + metadata ------------------------------------------------
     config.ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
     model.save_model(config.MODEL_PATH)
     # Reference distribution so a raw probability can be turned into a 0-1
-    # *relative* risk (percentile among all USC-area cell-hours in 2023).
-    qs = np.quantile(test_probs, np.linspace(0, 1, 101)).tolist()
+    # *relative* risk (percentile among all covered cell-hours in 2023).
+    qs = weighted_quantiles(test_probs, test_w, np.linspace(0, 1, 101)).tolist()
     meta = {
         "features": FEATURES, "target": args.target, "neg_rate": neg_rate,
         "best_iteration": int(model.best_iteration), "h3_res": config.H3_RES,
-        "bbox": config.BBOX, "data_start": config.DATA_START, "data_end": config.DATA_END,
+        "center": config.CENTER, "radius_miles": config.RADIUS_MILES,
+        "covered_cells": len(hist.cells), "no_data_cells": len(hist.no_data_cells),
+        "data_start": config.DATA_START, "data_end": config.DATA_END,
         "train_end": config.TRAIN_END, "risk_quantiles": qs,
         "trained_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
     }
@@ -150,10 +173,13 @@ def main():
     ax.plot([0, hi], [0, hi], ls="--", c="gray", lw=1, label="perfect")
     ax.plot(cal["mean_pred"], cal["observed"], marker="o", label="XGBoost (2023)")
     ax.set_xlabel("Predicted probability"); ax.set_ylabel("Observed frequency")
-    ax.set_title("Calibration, 2023 test grid"); ax.legend()
+    ax.set_title("Calibration, 2023 (weighted to full grid)"); ax.legend()
     fig.tight_layout(); fig.savefig(config.REPORT_DIR / "calibration.png", dpi=130); plt.close(fig)
 
-    sample = test_frame.sample(n=min(5000, len(test_frame)), random_state=config.SEED)[FEATURES]
+    # Weight by `w` so the SHAP sample looks like the real grid, not the
+    # positive-enriched evaluation frame.
+    sample = test_frame.sample(n=min(5000, len(test_frame)), weights="w",
+                               random_state=config.SEED)[FEATURES]
     booster = model.get_booster()
     contribs = booster.predict(xgb.DMatrix(sample), pred_contribs=True)[:, :-1]
     mean_abs = pd.Series(np.abs(contribs).mean(axis=0), index=FEATURES).sort_values()
