@@ -139,7 +139,9 @@ class LAPDCrimeIngestor(SocrataCrimeIngestor):
             "category": r.get("crm_cd_desc"),
             "crime_code": r.get("crm_cd"),
             "severity": int(r["part_1_2"]) if r.get("part_1_2") else None,
-            "raw": _keep(r, ("area_name", "premis_desc", "weapon_desc", "status_desc", "vict_age", "vict_sex")),
+            # weapon_used_cd feeds the risk model's severity (armed crimes weigh more)
+            "raw": _keep(r, ("area_name", "premis_desc", "weapon_used_cd", "weapon_desc", "status_desc",
+                             "vict_age", "vict_sex")),
         }
 
 

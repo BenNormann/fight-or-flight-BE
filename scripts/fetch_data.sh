@@ -7,7 +7,7 @@
 set -euo pipefail
 
 REPO="${DATA_RELEASE_REPO:-RithvikR1218/fight-or-flight-BE}"
-TAG="${DATA_RELEASE_TAG:-data-v1}"
+TAG="${DATA_RELEASE_TAG:-data-v2}"   # data-v2: 5-mile tiles; data-v1: 10-mile
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 

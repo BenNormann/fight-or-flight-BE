@@ -2,12 +2,12 @@
 # Maintainers: upload the large data files to the GitHub Release and refresh
 # data/checksums.sha256 (commit that file afterwards). Requires `gh auth login`.
 #
-#   ./scripts/publish_data_release.sh            # tag data-v1
+#   ./scripts/publish_data_release.sh            # tag data-v2
 #   DATA_RELEASE_TAG=data-v2 ./scripts/publish_data_release.sh
 set -euo pipefail
 
 REPO="${DATA_RELEASE_REPO:-RithvikR1218/fight-or-flight-BE}"
-TAG="${DATA_RELEASE_TAG:-data-v1}"
+TAG="${DATA_RELEASE_TAG:-data-v2}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
@@ -25,6 +25,6 @@ else
 "Large data files for the backend (too big for git). Fetch with \`./scripts/fetch_data.sh\`.
 
 - \`LARIAC6_Buildings_2020.gdb.zip\`: LA County Countywide Building Outlines (LARIAC6, 2020), source for \`build_buildings.sh\`
-- \`buildings.pmtiles\`: prebuilt 3D building tiles for the 10-mile USC circle (zoom 10-16, property \`height_m\`)"
+- \`buildings.pmtiles\`: prebuilt 3D building tiles for the USC study circle (zoom 10-16, property \`height_m\`)"
 fi
 echo "done: https://github.com/$REPO/releases/tag/$TAG"

@@ -3,7 +3,7 @@
 | Path | In git? | What |
 |---|---|---|
 | `pois/*.geojson` | yes | points of interest, loaded by `python -m scripts.load_pois` |
-| `raw/usc_10mi_roads.osm.pbf` | yes | OSM roads clipped to the study circle (`scripts/fetch_osm.sh`) |
+| `raw/usc_roads.osm.pbf` | yes | OSM roads clipped to the study circle + 1.5 km (`scripts/fetch_osm.sh`) |
 | `raw/LARIAC6_Buildings_2020.gdb.zip` | no (Release) | LA County building outlines (`./scripts/fetch_data.sh`) |
 | `tiles/buildings.pmtiles` | no (Release) | 3D building tiles |
 | `checksums.sha256` | yes | checksums of the Release files |

@@ -13,7 +13,8 @@ x-backend: &backend
     DATA_DIR: /data
   volumes:
     - ./backend:/app
-    - ./algorithm:/app/algorithm   # Desh's risk model package (import algorithm.*)
+    - ./risk-model:/app/algorithm  # risk model package; its code imports itself as algorithm.*
+    - ./pathfinding:/app/pathfinding  # safe-route planner
     - ./data:/data
 
 services:

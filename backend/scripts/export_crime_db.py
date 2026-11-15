@@ -24,7 +24,8 @@ from app.extensions import db
 
 LA = ZoneInfo(mcfg.TIMEZONE)
 SQL = text("""
-    SELECT external_id, ts, ST_Y(geom) AS lat, ST_X(geom) AS lon, crime_code, category, severity, h3_cell
+    SELECT external_id, ts, ST_Y(geom) AS lat, ST_X(geom) AS lon, crime_code, category, severity, h3_cell,
+           raw->>'weapon_used_cd' AS weapon
     FROM crime_incidents
     WHERE source = 'lapd' AND ts >= :start AND ts < :end
     ORDER BY ts
@@ -40,13 +41,16 @@ def main():
         rows = db.session.execute(SQL, {"start": start, "end": end}).fetchall()
 
         recs = []
-        for ext_id, ts, lat, lon, code, desc, sev, cell in rows:
+        missing_weapon = 0
+        for ext_id, ts, lat, lon, code, desc, sev, cell, weapon in rows:
             if not geo.in_radius(lat, lon):  # model's own circle definition
                 continue
             local = ts.astimezone(LA)
+            if weapon is None:
+                missing_weapon += 1
             recs.append((ext_id, local.date().isoformat(), local.hour * 100 + local.minute, local.hour,
-                         lat, lon, code, desc, None, str(sev) if sev is not None else None,
-                         cell, severity_tier(desc)))
+                         lat, lon, code, desc, weapon, str(sev) if sev is not None else None,
+                         cell, severity_tier(desc, code, weapon)))
 
         path = mcfg.DB_PATH
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -68,6 +72,9 @@ def main():
         for r in recs:
             years[r[1][:4]] = years.get(r[1][:4], 0) + 1
         print("  per year:", dict(sorted(years.items())))
+        if missing_weapon > 0.9 * max(len(recs), 1):
+            print("  WARNING: weapon codes missing (rows ingested before weapon_used_cd was stored); armed crimes "
+                  "will be under-weighted. Re-run scripts.backfill_crime --source lapd --start 2020-01-01, then export again.")
         if not years.get("2023"):
             print("  WARNING: no 2023 rows; the model's live history is anchored at 2023. "
                   "Run scripts.backfill_crime --source lapd --start 2020-01-01 first.")

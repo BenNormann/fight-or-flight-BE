@@ -6,7 +6,9 @@ data
 **/.pytest_cache
 **/.ipynb_checkpoints
 **/.venv
-algorithm/data/*.db
-algorithm/notebooks
-algorithm/*.ipynb
-algorithm/models/artifacts/dataset.parquet
+risk-model/data/*.db
+risk-model/outputs
+risk-model/*.ipynb
+risk-model/models/artifacts/dataset.parquet
+pathfinding/cache
+pathfinding/out

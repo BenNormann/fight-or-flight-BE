@@ -23,7 +23,8 @@ class Config:
     # Study area
     USC_LAT = _env("USC_LAT", 34.0224, float)
     USC_LNG = _env("USC_LNG", -118.2851, float)
-    RADIUS_KM = _env("RADIUS_KM", 16.09, float)
+    RADIUS_KM = _env("RADIUS_KM", 8.047, float)          # 5 miles, same as risk-model RADIUS_MILES
+    ROAD_MARGIN_KM = _env("ROAD_MARGIN_KM", 1.5, float)  # walk graph extends this far past the circle
     H3_RES = _env("H3_RES", 9, int)
     H3_AREA_RES = _env("H3_AREA_RES", 6, int)
 

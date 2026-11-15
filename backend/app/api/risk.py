@@ -82,7 +82,8 @@ def score(args):
     result = _run(risk_model.score_cell, cell, args.get("at"), args.get("date"), args.get("hour"),
                   use_live=args["live"], top_k=args["top_k"])
     if result["status"] == "outside":
-        abort(400, message="outside the model's 10-mile area")
+        from algorithm.common import config as mcfg
+        abort(400, message=f"outside the model's {mcfg.RADIUS_MILES:g}-mile area")
     return result
 
 

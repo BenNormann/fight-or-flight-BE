@@ -1,0 +1,162 @@
+"""Safe walking routes: the route planner in pathfinding/ running on backend data.
+
+pathfinding/ (see pathfinding/README.md) plans a route that keeps H3 cell risk low,
+passes USC blue-light phones and stays within a detour budget. Standalone, it
+downloads its own OSM graph from the public Overpass API and reads a risk cache
+file. Here it runs on what the backend already has, with its code unchanged:
+
+* graph: road_edges in PostGIS (the OSM walk network from data/raw/*.osm.pbf),
+  split into straight segments, which is exactly the shape pathfinding.graph.WalkGraph
+  expects (an edge's geometry is its two endpoints, length = haversine).
+* risk: the risk model's heatmap for the requested date (risk_model.heatmap,
+  memoised per date) wrapped in pathfinding.risk.RiskGrid's interface.
+
+The graph covers the study circle (RADIUS_KM, the same 5 miles as the risk model)
+plus ROAD_MARGIN_KM.
+"""
+import datetime as dt
+import json
+import logging
+import math
+import threading
+import time
+from functools import lru_cache
+
+import h3
+
+from ..db_utils import fetch_all
+from . import risk_model
+
+log = logging.getLogger(__name__)
+MAX_SNAP_M = 300.0          # start/end farther than this from a walkable street -> 400
+MAX_TRIP_KM = 12.0          # straight-line cap per request (planner cost grows with distance)
+
+_graph_lock = threading.Lock()
+_graph = None
+
+
+class RouteError(ValueError):
+    """Bad request for routing (outside the area, too far from a street, ...)."""
+
+
+def _graph_area():
+    """(center, radius_m) of the walk graph: study circle + ROAD_MARGIN_KM."""
+    from flask import current_app
+    c = current_app.config
+    return (c["USC_LAT"], c["USC_LNG"]), (c["RADIUS_KM"] + c["ROAD_MARGIN_KM"]) * 1000
+
+
+def explode_edges(geometries):
+    """[[lng, lat], ...] polylines -> node lat/lon lists and undirected straight
+    segments (u, v) between consecutive vertices. Vertices are merged by
+    coordinate (7 decimals), so polylines that share an endpoint connect."""
+    index, lat, lon, u, v, seen = {}, [], [], [], [], set()
+
+    def node(x, y):
+        key = (round(y, 7), round(x, 7))
+        i = index.get(key)
+        if i is None:
+            i = index[key] = len(lat)
+            lat.append(key[0])
+            lon.append(key[1])
+        return i
+
+    for coords in geometries:
+        if len(coords) < 2:
+            continue
+        prev = node(*coords[0][:2])
+        for c in coords[1:]:
+            cur = node(*c[:2])
+            if cur != prev:
+                e = (prev, cur) if prev < cur else (cur, prev)
+                if e not in seen:
+                    seen.add(e)
+                    u.append(e[0])
+                    v.append(e[1])
+            prev = cur
+    return lat, lon, u, v
+
+
+def walk_graph():
+    """pathfinding.graph.WalkGraph built from road_edges (once per process, ~10 s)."""
+    global _graph
+    if _graph is None:
+        with _graph_lock:
+            if _graph is None:
+                from pathfinding.graph import WalkGraph
+
+                t = time.time()
+                (lat0, lon0), r = _graph_area()
+                dlat = r / 111_320.0
+                dlon = r / (111_320.0 * math.cos(math.radians(lat0)))
+                rows = fetch_all("""
+                    SELECT ST_AsGeoJSON(geom, 7) AS g FROM road_edges
+                    WHERE geom && ST_MakeEnvelope(:w, :s, :e, :n, 4326)
+                """, w=lon0 - dlon, s=lat0 - dlat, e=lon0 + dlon, n=lat0 + dlat)
+                if not rows:
+                    raise risk_model.ModelUnavailable("road_edges is empty: run `python -m scripts.load_roads`")
+                lat, lon, u, v = explode_edges(json.loads(r_["g"])["coordinates"] for r_ in rows)
+                _graph = WalkGraph(lat, lon, u, v)
+                log.info("walk graph: %d road edges -> %d nodes, %d segments in %.1fs",
+                         len(rows), len(lat), len(u), time.time() - t)
+    return _graph
+
+
+@lru_cache(maxsize=4)
+def risk_grid(date_iso: str):
+    """pathfinding.risk.RiskGrid over the backend's heatmap for `date_iso`."""
+    from pathfinding.risk import NO_DATA_RISK, RiskGrid
+
+    cache = risk_model.heatmap(dt.date.fromisoformat(date_iso))
+
+    class BackendRiskGrid(RiskGrid):
+        def __init__(self):  # same attributes as RiskGrid, from the in-memory heatmap instead of a file
+            self.date = cache["date"]
+            self.res = int(cache["h3_res"])
+            self.step_m = h3.average_hexagon_edge_length(self.res, unit="m") / 3
+            self.no_data_risk = NO_DATA_RISK
+            self.cells = {c: v["risk"] for c, v in cache["cells"].items()}
+            self.no_data = frozenset(cache.get("no_data_cells", []))
+
+    return BackendRiskGrid()
+
+
+def warm():
+    try:
+        walk_graph()
+        risk_grid(risk_model.local_now().date().isoformat())
+        log.info("route planner warm")
+    except Exception as exc:  # noqa: BLE001  (routing is optional; don't kill the worker)
+        log.warning("route planner not warmed: %s", exc)
+
+
+def _route_json(r):
+    out = r.summary()
+    out["coords"] = r.coords                                       # [[lat, lon], ...]
+    out["geometry"] = {"type": "LineString", "coordinates": [[lon, lat] for lat, lon in r.coords]}
+    return out
+
+
+def plan(start, end, at=None, date=None, hour=None, **params) -> dict:
+    """Safe + shortest route between (lat, lon) points. params: planner knobs
+    (max_detour, phone_weight, pass_radius_m)."""
+    from pathfinding.graph import haversine_np
+    from pathfinding.planner import plan_route
+
+    trip_km = float(haversine_np(start[0], start[1], end[0], end[1])) / 1000
+    if trip_km > MAX_TRIP_KM:
+        raise RouteError(f"start and end are {trip_km:.1f} km apart; the limit is {MAX_TRIP_KM:g} km")
+    d, h, _, _ = risk_model.resolve_time(at, date, hour)
+    g = walk_graph()
+    for name, (la, lo) in (("start", start), ("end", end)):
+        _, snap = g.nearest_node(la, lo)
+        if snap > MAX_SNAP_M:
+            raise RouteError(f"{name} is {snap:.0f} m from the nearest walkable street in the route area")
+    try:
+        res = plan_route(start, end, hour=h, graph=g, risk=risk_grid(d.isoformat()), **params)
+    except ValueError as exc:  # same node / no path
+        raise RouteError(str(exc)) from exc
+    res["date"] = d.isoformat()
+    res["safe"] = _route_json(res["safe"])
+    res["shortest"] = _route_json(res["shortest"])
+    return res
