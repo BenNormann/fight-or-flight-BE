@@ -1,11 +1,13 @@
 FROM python:3.12-slim AS app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 FLASK_APP=wsgi:app
 WORKDIR /app
-# Build context = repo root, so the risk model package (algorithm/) ships in the image
+# Build context = repo root, so the risk model and route planner ship in the image.
+# risk-model/ is installed as the `algorithm` package: its code imports itself as algorithm.*
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ /app/
-COPY algorithm/ /app/algorithm/
+COPY risk-model/ /app/algorithm/
+COPY pathfinding/ /app/pathfinding/
 EXPOSE 5000
 CMD ["gunicorn", "-c", "gunicorn.conf.py", "wsgi:app"]
 

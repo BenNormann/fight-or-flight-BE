@@ -2,7 +2,7 @@
 
 Backend for the USC safe-route project. It collects **space-time data** (light, weather, crime) for a 10-mile circle around USC, stores it in **PostgreSQL + PostGIS + TimescaleDB**, and serves it to:
 
-- the **crime-risk model** in `algorithm/` (XGBoost, by Desh; see `algorithm/README.md`), which the API loads in-process and feeds with backend data, and
+- the **crime-risk model** in `risk-model/` and the **safe-route planner** in `pathfinding/` (by Desh), which the API runs in-process on backend data, and
 - the **frontend**, which gets 3D buildings as PMTiles, a risk heatmap, and JSON data layers.
 
 ```
@@ -14,9 +14,9 @@ STATIC (one-time scripts, run by you)            PostgreSQL 16 + PostGIS + Times
         └─▶ data/tiles/buildings.pmtiles                       │
   OSM extract (.osm.pbf) ─ fetch_osm.sh + load_roads ▶ road_nodes, road_edges
                                                                ▼
-       crime_incidents ─ export_crime_db ─▶ algorithm/data/crime.db
+       crime_incidents ─ export_crime_db ─▶ risk-model/data/crime.db
                                                                ▼
-              Flask API (/api/v1) + risk model (algorithm/) ──▶ frontend / routing
+   Flask API (/api/v1) + risk model (risk-model/) + planner (pathfinding/) ──▶ frontend
 ```
 
 ## Quick start
@@ -105,7 +105,8 @@ Add a source by subclassing `Ingestor` (`backend/app/ingestion/base.py`), implem
 | `GET /risk/status` | model loaded?, training dates, 2023 test metrics |
 | `GET /risk/score?lat=&lng=\|cell=&hour=&date=\|at=` | **risk + top factors for a point**, plus everything the backend knows about that cell |
 | `GET /risk/hotzones?hour=&date=&bbox=&min_risk=` | **heatmap**: risk for every modelled cell at an hour, plus `no_data_cells` |
-| `GET /risk/edges?hour=&date=&lambda=&format=parquet\|csv\|json` | **route costs** for every walk-graph edge: `cost = length_m × (1 + λ·risk)` |
+| `GET /risk/edges?hour=&date=&lambda=&format=parquet\|csv\|json` | route costs for every walk-graph edge: `cost = length_m × (1 + λ·risk)` |
+| `GET /route?from=lat,lng&to=lat,lng&hour=&date=&max_detour=&phone_weight=` | **safe vs shortest walking route** with risk and blue-light stats (see [Risk model and route planner](#risk-model-and-route-planner)) |
 | `POST /admin/ingest/{source}` | run one ingestor now (`X-Admin-Token` if `ADMIN_TOKEN` is set) |
 | `GET /auth/login?next=<FE url>` | full-page redirect to Google sign-in (see [Auth](#auth)) |
 | `GET /auth/callback` | Google returns here; sets the session cookie, redirects to `next` |
@@ -173,26 +174,37 @@ spaces, or starts with `#` (an `.env` comment read as the value).
   `/api/*` only allows those origins.
 - `authlib` is a new dependency: deploy with `docker compose up -d --build`.
 
-## Risk model integration
+## Risk model and route planner
 
-The crime-risk model lives in `algorithm/` (training, evaluation and the model card are in `algorithm/README.md`). The API imports `algorithm.scoring.score` directly. Each gunicorn worker loads the model plus its crime history once at startup, which takes ~4 s and ~600 MB per worker. That's why `gunicorn.conf.py` runs 2 workers × 4 threads.
+Two packages by Desh live next to the backend, and the API runs both in-process:
+
+- **`risk-model/`**: the XGBoost crime-risk model. Training, evaluation and the model card are in `risk-model/README.md` and `risk-model/MODEL_GUIDE.md`. It covers a **5-mile circle** around USC (1,451 modelled cells).
+- **`pathfinding/`**: the safe-route planner (`pathfinding/README.md`).
+
+`risk-model/`'s code imports itself as `algorithm.*`, so the Docker image installs it at `/app/algorithm` (`COPY risk-model/ /app/algorithm/`, and the same mount in `docker-compose.yml`). Neither package is modified by the backend. Each gunicorn worker loads the model plus its crime history (~4 s, ~600 MB) and the route graph at startup, which is why `gunicorn.conf.py` runs 2 workers × 4 threads.
 
 **Data the backend gives the model:**
 
 | Model input | Source |
 |---|---|
-| crime history: cell 7/30/90-day counts, severity, same-hour, neighbours, area-wide | `crime_incidents` (LAPD `2nrs-mtv8`, 2020–2024) exported to `algorithm/data/crime.db` by `scripts/export_crime_db.py`. The backend is the only crime downloader, and its output matches the model author's own download (99.2% of cell-hours identical, rank correlation 1.0). |
+| crime history: per-incident harm (severity × recency × time of day), neighbours, long-run rates, area-wide | `crime_incidents` (LAPD `2nrs-mtv8`, 2020–2024, including `weapon_used_cd`, which raises the severity of armed crimes), exported to `risk-model/data/crime.db` by `scripts/export_crime_db.py`. The backend is the only crime downloader. Its output reproduces the model author's own heatmap (99.8% of cell-hours within 0.01, rank correlation 0.9997). |
 | `is_dark` | live sun ingestor, for current-hour requests; other hours use the model's own astral calculation |
-| time, location, blue-light distance | computed inside the model |
+| time, location, distance to the 83 USC blue-light phones | computed inside the model (`risk-model/data/bluelight_phones.csv`) |
 
-`/risk/score` builds a context dict for the cell from the backend database: weather, darkness, lit-road share, streetlights, buildings, roads, POIs, and live crime counts including NIBRS 2025+. Every key whose name matches a model feature is passed to the model as an input. The response lists them under `model_inputs_from_backend`; everything else comes back under `context`. The model only uses `is_dark` from this list today. If it's retrained with backend features using the same names as `/features` (e.g. `temp_c`, `lit_road_length_m`, `seating_count`), those values flow in with no backend change.
+`/risk/score` builds a context dict for the cell from the backend database: weather, darkness, lit-road share, streetlights, buildings, roads, POIs, and live crime counts including NIBRS 2025+. Every key whose name matches a model feature is passed to the model as an input. The response lists them under `model_inputs_from_backend`; everything else comes back under `context`.
+
+**Safe routes (`GET /api/v1/route?from=lat,lng&to=lat,lng&hour=`):** the planner in `pathfinding/` runs on backend data instead of its standalone inputs:
+- **Graph:** `road_edges` from PostGIS (the OSM walk network from `data/raw/usc_10mi_roads.osm.pbf`) is split into straight segments, which is the shape `pathfinding.graph.WalkGraph` expects. It covers the model circle plus 1.5 km. There's no Overpass download.
+- **Risk:** the model's heatmap for the requested date (`/risk/hotzones`, memoised per date), not a fixed cache file.
+- **Response:** `safe` and `shortest` routes, each with length, detour %, mean/max risk, metres in high-risk cells, % without data, blue-light phones passed, `coords` (`[[lat, lng], ...]`) and a GeoJSON `geometry`.
+- **Knobs:** `max_detour` (default 0.2, i.e. the safe route is at most 20% longer) and `phone_weight` (0.05).
+- **Limits:** trips are capped at 12 km straight-line, and points must be within 300 m of a walkable street.
+
+`/risk/edges` still gives a per-edge cost for anyone running their own router.
 
 Known limits:
 - The model anchors its history at the end of 2023, because LAPD's 2024 NIBRS switch halved the old dataset's counts. NIBRS 2025+ data is therefore context only until the model is retrained on it.
-- About half the cells are other police jurisdictions. They return `no_data`, which means unknown, not safe.
-- Blue-light phone locations in `algorithm/common/geo.py` are placeholders.
-
-**Routing:** `/risk/edges` gives a cost per edge of the walk graph for an hour. Join it to `/roads/graph?part=edges` on `(u, v, key)` and run A* on `cost` for the safest route, or on `length_m` for the fastest. Cells without data get a neutral risk of 0.5, and `no_data_share` flags how much of an edge they cover.
+- Cells outside the 5-mile model circle, or in other police jurisdictions, have no score. Routes treat them as a neutral 0.5 and report `no_data_pct`.
 
 ## Data files
 
@@ -205,7 +217,7 @@ GitHub rejects files over 100 MB, so the two large files live in a **GitHub Rele
 | `data/raw/usc_10mi_roads.osm.pbf` | 12 MB | git | OSM roads clipped to the circle |
 | `data/checksums.sha256` | — | git | SHA-256 of the Release files |
 | `data/work/` | ~1 GB | ignored | downloads + intermediates; safe to delete |
-| `algorithm/data/crime.db` | 122 MB | ignored | model crime history, generated by `scripts/export_crime_db.py` |
+| `risk-model/data/crime.db` | ~120 MB | ignored | model crime history, generated by `scripts/export_crime_db.py` |
 
 `./scripts/fetch_data.sh` downloads the Release files into place and verifies their checksums. It resumes partial downloads and skips files already present. Pass `--no-tiles` to skip the tiles and build them yourself.
 
