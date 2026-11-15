@@ -20,6 +20,19 @@ class BBox(ma.fields.Field):
         return parts
 
 
+class LatLng(ma.fields.Field):
+    """'lat,lng' -> (lat, lng)."""
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        try:
+            lat, lng = (float(x) for x in str(value).split(","))
+        except ValueError as exc:
+            raise ValidationError("expected 'lat,lng'") from exc
+        if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+            raise ValidationError("lat/lng out of range")
+        return lat, lng
+
+
 class CsvList(ma.fields.Field):
     def _deserialize(self, value, attr, data, **kwargs):
         return [v.strip() for v in str(value).split(",") if v.strip()]

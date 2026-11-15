@@ -3,26 +3,12 @@ from datetime import timezone
 
 import marshmallow as ma
 from flask_smorest import Blueprint, abort
-from marshmallow import ValidationError
 
 from ..services import risk_model, routing
-from .params import BaseArgs
+from .params import BaseArgs, LatLng
 
 blp = Blueprint("route", __name__, url_prefix="/api/v1/route",
                 description="Safe walking routes: low crime risk, past blue-light phones, bounded detour")
-
-
-class LatLng(ma.fields.Field):
-    """'lat,lng' -> (lat, lng)."""
-
-    def _deserialize(self, value, attr, data, **kwargs):
-        try:
-            lat, lng = (float(x) for x in str(value).split(","))
-        except ValueError as exc:
-            raise ValidationError("expected 'lat,lng'") from exc
-        if not (-90 <= lat <= 90 and -180 <= lng <= 180):
-            raise ValidationError("lat/lng out of range")
-        return lat, lng
 
 
 class RouteArgs(BaseArgs):
