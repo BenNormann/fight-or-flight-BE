@@ -25,7 +25,7 @@ def list_cells(args):
     geom = ", ST_AsGeoJSON(geom)::json AS geometry" if args["format"] == "geojson" else ""
     rows = fetch_all(f"""
         SELECT cell, parent_r6, building_count, avg_height_m, streetlight_count,
-               road_length_m, lit_road_length_m, intersection_count{geom}
+               road_length_m, lit_road_length_m, intersection_count, poi_counts{geom}
         FROM h3_cells {where} ORDER BY cell LIMIT :limit
     """, **params)
     if args["format"] == "geojson":

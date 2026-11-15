@@ -1,4 +1,4 @@
-"""Recompute static per-cell features after loading buildings / streetlights / roads."""
+"""Recompute static per-cell features after loading buildings / streetlights / roads / POIs."""
 from sqlalchemy import text
 
 from ..extensions import db
@@ -13,7 +13,8 @@ UPDATE h3_cells c SET
   streetlight_count  = COALESCE(s.n, 0),
   road_length_m      = COALESCE(r.len, 0),
   lit_road_length_m  = COALESCE(r.lit_len, 0),
-  intersection_count = COALESCE(i.n, 0)
+  intersection_count = COALESCE(i.n, 0),
+  poi_counts         = COALESCE(p.counts, '{{}}'::jsonb)
 FROM h3_cells c2
 LEFT JOIN (SELECT h3_cell, count(*) n, avg(height_m) avg_h FROM buildings GROUP BY h3_cell) b
        ON b.h3_cell = c2.cell
@@ -25,6 +26,9 @@ LEFT JOIN (SELECT h3_cell, sum(length_m) len,
        ON r.h3_cell = c2.cell
 LEFT JOIN (SELECT h3_cell, count(*) n FROM road_nodes WHERE street_count >= 3 GROUP BY h3_cell) i
        ON i.h3_cell = c2.cell
+LEFT JOIN (SELECT h3_cell, jsonb_object_agg(type, n) counts
+           FROM (SELECT h3_cell, type, count(*) n FROM pois GROUP BY 1, 2) x GROUP BY h3_cell) p
+       ON p.h3_cell = c2.cell
 WHERE c.cell = c2.cell
 """
 

@@ -1,4 +1,5 @@
 from geoalchemy2 import Geometry
+from sqlalchemy.dialects.postgresql import JSONB
 
 from ..extensions import db
 
@@ -18,3 +19,4 @@ class H3Cell(db.Model):
     road_length_m = db.Column(db.Float, nullable=False, server_default="0")
     lit_road_length_m = db.Column(db.Float, nullable=False, server_default="0")
     intersection_count = db.Column(db.Integer, nullable=False, server_default="0")
+    poi_counts = db.Column(JSONB, nullable=False, server_default="{}")

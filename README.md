@@ -36,6 +36,7 @@ That gives you the **live data**. On first start the crime ingestors backfill fr
 ```bash
 docker compose run --rm tools bash scripts/build_buildings.sh   # ~3 min: buildings -> PostGIS (+ rebuilds PMTiles)
 docker compose run --rm tools python -m scripts.load_roads      # ~3 min: OSM walk network -> PostGIS
+docker compose exec api python -m scripts.load_pois              # seconds: data/pois/*.geojson -> PostGIS
 # (only if data/raw/usc_10mi_roads.osm.pbf is missing: bash scripts/fetch_osm.sh first)
 ```
 
@@ -58,12 +59,12 @@ Every data point is keyed by an [H3](https://h3geo.org) hexagon, stored as a hex
 | `crime_incidents` | hypertable (30-day chunks) | point events with geometry + H3 cell |
 | `obs_10min`, `obs_hourly` | continuous aggregates | avg/min/max/last per cell+metric, kept fresh by policies, real-time enabled |
 | `crime_hourly` | continuous aggregate | incident counts per cell, hour, category |
-| `ml_features` | view | one row per `(h3_cell, 10-min bucket)`: sun, darkness, weather, outages, static cell features (buildings, roads), trailing-30-day crime count |
+| `ml_features` | view | one row per `(h3_cell, 10-min bucket)`: sun, darkness, weather, outages, static cell features (buildings, roads, POI counts), trailing-30-day crime count |
 | `h3_cells` | PostGIS table | res-9 grid + static features (buildings, roads, streetlights) |
-| `buildings`, `road_nodes`, `road_edges`, `streetlights` | PostGIS tables | static layers, loaded by scripts |
+| `buildings`, `road_nodes`, `road_edges`, `pois`, `streetlights` | PostGIS tables | static layers, loaded by scripts |
 | `ingest_runs` | table | ingestion audit log, shown in `/health` and `/sources` |
 
-Policies: raw `observations` compress after 3 days and are dropped after 90 days. Aggregates are kept indefinitely. The schema lives in `backend/migrations/versions/` (`0001_initial`, `0002_roads`).
+Policies: raw `observations` compress after 3 days and are dropped after 90 days. Aggregates are kept indefinitely. The schema lives in `backend/migrations/versions/` (`0001_initial`, `0002_roads`, `0003_pois`).
 
 ## Ingestion sources
 
@@ -97,6 +98,8 @@ Add a source by subclassing `Ingestor` (`backend/app/ingestion/base.py`), implem
 | `GET /buildings?bbox=` | building GeoJSON for a small area |
 | `GET /roads?bbox=` | road edges as GeoJSON for a small area |
 | `GET /roads/graph?part=nodes\|edges&format=parquet\|csv\|json` | **full walk graph for routing** |
+| `GET /pois?bbox=&type=seating,study` | points of interest as GeoJSON (extra attributes in `properties`) |
+| `GET /pois/types` | POI types with counts |
 | `POST /admin/ingest/{source}` | run one ingestor now (`X-Admin-Token` if `ADMIN_TOKEN` is set) |
 
 `bbox` is `minLng,minLat,maxLng,maxLat`. Times are ISO-8601, interpreted as UTC if no offset is given.
@@ -131,6 +134,7 @@ These change rarely, so they are loaded by scripts instead of the ingestor. Re-r
 | H3 grid | computed | `docker compose exec api python -m scripts.seed_h3_cells` | `h3_cells` (run this first) |
 | Buildings | LA County LARIAC6 Building Outlines (file in repo) | `docker compose run --rm tools bash scripts/build_buildings.sh` | `buildings` table, `data/tiles/buildings.pmtiles` |
 | Roads | OpenStreetMap extract (file in repo) | `docker compose run --rm tools python -m scripts.load_roads` | `road_nodes`, `road_edges` |
+| POIs | `data/pois/*.geojson` (in git) | `docker compose exec api python -m scripts.load_pois` | `pois` |
 | Streetlights | LA GeoHub export (optional, bring your own file) | `docker compose exec api python -m scripts.load_streetlights /data/raw/<file>` | `streetlights` |
 
 ### Buildings
@@ -169,6 +173,17 @@ What gets stored:
 - Per-cell features go into `h3_cells`: `road_length_m`, `lit_road_length_m`, `intersection_count`. They are also exposed through `/cells` and `/features`.
 
 For the ML service, pull the full graph with `GET /api/v1/roads/graph?part=nodes` and `?part=edges` (Parquet by default), then build e.g. a networkx graph keyed on `osmid`.
+
+### POIs
+
+Campus points of interest, such as outdoor seating and study spots, live as GeoJSON files in `data/pois/` (format in `data/README.md`). `load_pois` does the following:
+- Upserts every file into `pois(id, type, name, source, source_file, props, geom, h3_cell)`. `props` keeps any extra attributes, such as `table_count_est`.
+- Deletes rows that were removed from a file.
+- Recomputes `h3_cells.poi_counts`, e.g. `{"seating": 4}`.
+
+The frontend reads `GET /api/v1/pois?type=seating`. The ML feature matrix gets `seating_count` and `poi_count` per cell.
+
+Current data: `usc_outdoor_table_groups.geojson`, 15 outdoor table groups found from satellite imagery and checked by hand (PR #1).
 
 ## Development
 
