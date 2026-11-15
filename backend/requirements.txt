@@ -25,3 +25,4 @@ osmnx>=2.0,<3
 xgboost-cpu>=3.0,<4
 scipy>=1.11
 numpy>=1.26
+tzdata>=2024.1          # zoneinfo data for opening-hours checks (Windows / slim images)

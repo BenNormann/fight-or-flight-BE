@@ -102,6 +102,10 @@ Add a source by subclassing `Ingestor` (`backend/app/ingestion/base.py`), implem
 | `GET /roads/graph?part=nodes\|edges&format=parquet\|csv\|json` | **full walk graph for routing** |
 | `GET /pois?bbox=&type=seating,study` | points of interest as GeoJSON (extra attributes in `properties`) |
 | `GET /pois/types` | POI types with counts |
+| `GET /search?q=&near=lat,lng&bbox=&category=&open_now=&limit=` | **place search / autocomplete** (see [Search API](#search-api)) |
+| `GET /search/categories` | categories and place types with counts (for filter chips) |
+| `GET /places/{id}` | one place: hours per weekday, phone, website, photo, ratings, reviews |
+| `GET /geocode/reverse?at=lat,lng` | name for a point: nearest place/building within ~60 m, else nearest named road |
 | `GET /risk/status` | model loaded?, training dates, 2023 test metrics |
 | `GET /risk/score?lat=&lng=\|cell=&hour=&date=\|at=` | **risk + top factors for a point**, plus everything the backend knows about that cell |
 | `GET /risk/hotzones?hour=&date=&bbox=&min_risk=` | **heatmap**: risk for every modelled cell at an hour, plus `no_data_cells` |
@@ -295,6 +299,41 @@ Campus points of interest, such as outdoor seating and study spots, live as GeoJ
 The frontend reads `GET /api/v1/pois?type=seating`. The ML feature matrix gets `seating_count` and `poi_count` per cell.
 
 Current data: `usc_outdoor_table_groups.geojson`, 15 outdoor table groups found from satellite imagery and checked by hand (PR #1).
+
+## Search API
+
+Google-Maps-style place search over the `places` table (Google Maps places, USC buildings with their codes, campus POIs). Public, read-only. Load or refresh the table with:
+
+```bash
+docker compose exec api python -m scripts.load_places     # data/usc_google_maps_places.geojson, data/places/, pois
+```
+
+`GET /api/v1/search` parameters:
+
+| Param | Meaning |
+|---|---|
+| `q` | free text, works from 1 character. Optional when `category` is set |
+| `near` | `lat,lng`; ranks by distance and adds `distance_m` (integer metres) |
+| `bbox` | `minLng,minLat,maxLng,maxLat` hard filter |
+| `category` | comma-separated top-level ids from `/search/categories`, e.g. `food,cafe` |
+| `open_now` | `true` keeps only places known to be open now (unknown hours are dropped) |
+| `limit` | default 20, max 50 |
+
+Response: `{"results": [{id, kind, name, category, subcategory, address, lat, lng, distance_m, rating, review_count, open_now}]}`, best first. `open_now` is left out when hours are unknown. No `q` and no `category` returns `400`; malformed params return `422` (same error shape as the rest of the API). `q=` empty with `category=food&near=...` gives the nearest places in that category (the Food / Study / Parking chips).
+
+How results are ranked (`app/services/search.py`):
+1. **Query understanding.** `q` is normalized (`services/text_norm.py`: lowercase, accents and apostrophes dropped). Stop words (`near`, `in`, `the`, ...) are removed, and every word is checked for a category meaning (`place_taxonomy.category_intent`: "coffee" means cafes).
+2. **Candidates.** One SQL statement collects at most a few hundred rows. It is a union of small branches, each using an index and keeping only its nearest rows: exact name or alias (building codes), name prefix (btree), word prefix or substring (GIN trigram), typos (`<%` word similarity, 3+ characters), category intent, "every word matches name, address or category" (e.g. `starbucks figueroa`, `coffee near vermont`), and address. The `bbox`/`category` filters apply to every branch.
+3. **Ranking** (pure Python). Results are first grouped by how well the text matches:
+   - exact name or code (`vkc`), then
+   - name or word prefix (`dulc` → Cafe Dulce, `klein` → Von KleinSmid). Full-name prefixes get a bonus inside this group.
+   - then typos (Damerau-Levenshtein: 1 edit for 4-7 letters, 2 for 8+; `doheney`, `starbuks`), then
+   - category only (`coffee` → cafes without "coffee" in the name), then
+   - address only.
+
+   Inside a group the score is `0.30·text + 0.55·proximity + 0.15·popularity`, where proximity = `1/(1 + d/400 m)`. For 1-2 character queries it is `0.15 / 0.50 / 0.35`. Campus buildings get a small bump. Chain branches are kept separate and ordered by distance.
+
+Search responses are cached for 30 s (`Cache-Control: public`); categories and place details for 5 minutes.
 
 ## Development
 
