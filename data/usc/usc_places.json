@@ -1,0 +1,462 @@
+{
+ "generated_at": "2026-11-15T05:47:15+00:00",
+ "source": "OpenStreetMap contributors (ODbL)",
+ "buildings": {
+  "ACB": {
+   "name": "Ahmanson Center for Biological Research",
+   "lat": 34.019362,
+   "lng": -118.286918,
+   "osm": "way/406923975"
+  },
+  "ADM": {
+   "name": "Bovard Administration Building",
+   "lat": 34.021031,
+   "lng": -118.285576,
+   "osm": "way/406923885"
+  },
+  "AHF": {
+   "name": "Allan Hancock Foundation",
+   "lat": 34.019562,
+   "lng": -118.284859,
+   "osm": "way/154906674"
+  },
+  "ANN": {
+   "name": "Wallis Annenberg Hall",
+   "lat": 34.020776,
+   "lng": -118.287024,
+   "osm": "way/406923961"
+  },
+  "ASC": {
+   "name": "Annenberg School for Communication & Journalism",
+   "lat": 34.021996,
+   "lng": -118.286212,
+   "osm": "way/406923882"
+  },
+  "BHE": {
+   "name": "Beigler Hall of Engineering",
+   "lat": 34.020538,
+   "lng": -118.288538,
+   "osm": "way/140790293"
+  },
+  "CAS": {
+   "name": "College Academic Services Building",
+   "lat": 34.022365,
+   "lng": -118.283708,
+   "osm": "way/406923888"
+  },
+  "DCC": {
+   "name": "Davidson Continuing Education Center;USC International Academy",
+   "lat": 34.021616,
+   "lng": -118.280692,
+   "osm": "relation/6095468"
+  },
+  "DMC": {
+   "name": "Dr. Joseph Medicine Crow Center for International and Public Affairs",
+   "lat": 34.021163,
+   "lng": -118.283722,
+   "osm": "relation/6095465"
+  },
+  "DOH": {
+   "name": "Edward L Doheny Junior Memorial Library",
+   "lat": 34.020163,
+   "lng": -118.283741,
+   "osm": "relation/6095470"
+  },
+  "DRC": {
+   "name": "Denney Research Center",
+   "lat": 34.021418,
+   "lng": -118.291136,
+   "osm": "way/406923891"
+  },
+  "EEB": {
+   "name": "Hughes Aircraft Electrical Engineering Center",
+   "lat": 34.019717,
+   "lng": -118.290099,
+   "osm": "way/406923899"
+  },
+  "GER": {
+   "name": "USC Leonard Davis School of Gerontology",
+   "lat": 34.020238,
+   "lng": -118.29047,
+   "osm": "relation/6095455"
+  },
+  "GFS": {
+   "name": "Grace Ford Salvatori Hall of Letters, Arts and Sciences",
+   "lat": 34.021307,
+   "lng": -118.288031,
+   "osm": "way/406923897"
+  },
+  "HAR": {
+   "name": "May Ormerod Harris Hall",
+   "lat": 34.018827,
+   "lng": -118.287689,
+   "osm": "relation/1983202"
+  },
+  "HNB": {
+   "name": "Hedco Neurosciences Building",
+   "lat": 34.02074,
+   "lng": -118.287885,
+   "osm": "way/406923898"
+  },
+  "IRC": {
+   "name": "Parkside International Residential College",
+   "lat": 34.019178,
+   "lng": -118.291086,
+   "osm": "way/406923901"
+  },
+  "IYH": {
+   "name": "USC Iovine and Young Academy",
+   "lat": 34.01864,
+   "lng": -118.288349,
+   "osm": "way/727901784"
+  },
+  "JFF": {
+   "name": "Jill & Frank Fertitta Hall",
+   "lat": 34.018675,
+   "lng": -118.282461,
+   "osm": "way/430431424"
+  },
+  "KAP": {
+   "name": "Kaprielian Hall",
+   "lat": 34.022414,
+   "lng": -118.291023,
+   "osm": "way/406923906"
+  },
+  "KDC": {
+   "name": "Glorya Kaufman International Dance Center",
+   "lat": 34.023617,
+   "lng": -118.285227,
+   "osm": "way/154906707"
+  },
+  "LHI": {
+   "name": "Donald P and Katherine B Loker Hydrocarbon Research Institute",
+   "lat": 34.01974,
+   "lng": -118.287846,
+   "osm": "way/406923939"
+  },
+  "LJS": {
+   "name": "Laird J Stabler Memorial Hall",
+   "lat": 34.019675,
+   "lng": -118.286494,
+   "osm": "way/406923873"
+  },
+  "LRC": {
+   "name": "Lyon Recreation Center",
+   "lat": 34.024406,
+   "lng": -118.288427,
+   "osm": "way/406923909"
+  },
+  "LVL": {
+   "name": "Leavey Library",
+   "lat": 34.021785,
+   "lng": -118.28294,
+   "osm": "way/406923908"
+  },
+  "MCB": {
+   "name": "Michelson Center for Convergent Biosciences",
+   "lat": 34.021712,
+   "lng": -118.289619,
+   "osm": "way/555848401"
+  },
+  "MHP": {
+   "name": "Seeley Wintersmith Mudd Memorial Hall of Philosophy",
+   "lat": 34.018626,
+   "lng": -118.286931,
+   "osm": "relation/6095464"
+  },
+  "MRF": {
+   "name": "Montgomery Ross Fisher Building",
+   "lat": 34.022341,
+   "lng": -118.282531,
+   "osm": "way/406923911"
+  },
+  "OHE": {
+   "name": "Olin Hall of Engineering",
+   "lat": 34.020692,
+   "lng": -118.289504,
+   "osm": "relation/1905843"
+  },
+  "PCE": {
+   "name": "Jerry and Nancy Neely Petroleum and Chemical Engineering Building",
+   "lat": 34.020174,
+   "lng": -118.289008,
+   "osm": "way/406923913"
+  },
+  "PED": {
+   "name": "Physical Education Building",
+   "lat": 34.021365,
+   "lng": -118.286288,
+   "osm": "relation/6095459"
+  },
+  "PHE": {
+   "name": "Charles Lee Powell Hall",
+   "lat": 34.019192,
+   "lng": -118.288842,
+   "osm": "way/406923923"
+  },
+  "PKS": {
+   "name": "Parkside Apartments",
+   "lat": 34.019285,
+   "lng": -118.290245,
+   "osm": "way/406923921"
+  },
+  "PRB": {
+   "name": "Parkside Arts and Humanities Residential College",
+   "lat": 34.018728,
+   "lng": -118.290071,
+   "osm": "way/406923883"
+  },
+  "RPB": {
+   "name": "Rapp Hall",
+   "lat": 34.020016,
+   "lng": -118.287524,
+   "osm": "way/442277358"
+  },
+  "RRI": {
+   "name": "Irani Hall",
+   "lat": 34.022203,
+   "lng": -118.290271,
+   "osm": "way/406923902"
+  },
+  "RTCC": {
+   "name": "Ronald Tutor Campus Center",
+   "lat": 34.020397,
+   "lng": -118.286346,
+   "osm": "way/154906751"
+  },
+  "RTH": {
+   "name": "Ronald Tutor Hall",
+   "lat": 34.020087,
+   "lng": -118.289835,
+   "osm": "way/406923927"
+  },
+  "SAL": {
+   "name": "Henry Salvatori Computer Science Center",
+   "lat": 34.019485,
+   "lng": -118.289513,
+   "osm": "way/406923928"
+  },
+  "SGM": {
+   "name": "Seeley G. Mudd Building",
+   "lat": 34.021507,
+   "lng": -118.288944,
+   "osm": "way/406923936"
+  },
+  "SLH": {
+   "name": "Stauffer Science Lecture Hall",
+   "lat": 34.019622,
+   "lng": -118.287593,
+   "osm": "way/442277367"
+  },
+  "SOS": {
+   "name": "Social Sciences Building",
+   "lat": 34.021581,
+   "lng": -118.283763,
+   "osm": "way/406923937"
+  },
+  "SSC": {
+   "name": "Frank R Seaver Science Center",
+   "lat": 34.019806,
+   "lng": -118.28928,
+   "osm": "way/406923894"
+  },
+  "SSL": {
+   "name": "Seaver Science Library",
+   "lat": 34.019585,
+   "lng": -118.288758,
+   "osm": "way/442277361"
+  },
+  "STU": {
+   "name": "Student Union",
+   "lat": 34.020203,
+   "lng": -118.285646,
+   "osm": "relation/6095474"
+  },
+  "THH": {
+   "name": "Taper Hall",
+   "lat": 34.022229,
+   "lng": -118.284616,
+   "osm": "way/406923941"
+  },
+  "VHE": {
+   "name": "Vivian Hall of Engineering",
+   "lat": 34.020154,
+   "lng": -118.288237,
+   "osm": "way/406923953"
+  },
+  "VPD": {
+   "name": "Verna and Peter Dauterive Hall",
+   "lat": 34.018908,
+   "lng": -118.283753,
+   "osm": "way/277176270"
+  },
+  "WAH": {
+   "name": "Ray and Nadine Watt Hall of Architecture and Fine Arts",
+   "lat": 34.019074,
+   "lng": -118.288061,
+   "osm": "way/406923925"
+  },
+  "WPH": {
+   "name": "Waite Phillips Hall",
+   "lat": 34.021956,
+   "lng": -118.283825,
+   "osm": "way/406923958"
+  },
+  "ZHS": {
+   "name": "Zumberge Hall of Science",
+   "lat": 34.01932,
+   "lng": -118.286337,
+   "osm": "relation/6095466"
+  }
+ },
+ "venues": {
+  "AHF": {
+   "lat": 34.019562,
+   "lng": -118.284859,
+   "osm": "way/154906674",
+   "osm_name": "Allan Hancock Foundation",
+   "approx": true
+  },
+  "Alumni Park": {
+   "lat": 34.020638,
+   "lng": -118.28452,
+   "osm": "way/154906676",
+   "osm_name": "Alumni Park",
+   "approx": false
+  },
+  "Associates Park": {
+   "lat": 34.021185,
+   "lng": -118.285947,
+   "osm": "way/154906798",
+   "osm_name": "Associates Park",
+   "approx": false
+  },
+  "Bogardus Courtyard": {
+   "lat": 34.021713,
+   "lng": -118.283925,
+   "osm": "relation/6584127",
+   "osm_name": "Bogardus Courtyard",
+   "approx": false
+  },
+  "CAS Lawn": {
+   "lat": 34.022365,
+   "lng": -118.283708,
+   "osm": "way/406923888",
+   "osm_name": "College Academic Services Building",
+   "approx": true
+  },
+  "Dr. Medicine Crow": {
+   "lat": 34.021163,
+   "lng": -118.283722,
+   "osm": "relation/6095465",
+   "osm_name": "Dr. Joseph Medicine Crow Center for International and Public Affairs",
+   "approx": true
+  },
+  "E.F. Hutton": {
+   "lat": 34.021703,
+   "lng": -118.285243,
+   "osm": "way/154906721",
+   "osm_name": "Hutton Park",
+   "approx": false
+  },
+  "Founders Park": {
+   "lat": 34.021703,
+   "lng": -118.285243,
+   "osm": "way/154906721",
+   "osm_name": "Hutton Park",
+   "approx": true
+  },
+  "Great Lawn": {
+   "lat": 34.026722,
+   "lng": -118.285215,
+   "osm": "way/727000078",
+   "osm_name": "Great Lawn",
+   "approx": false
+  },
+  "Hahn Plaza": {
+   "lat": 34.020383,
+   "lng": -118.28527,
+   "osm": "way/442277347",
+   "osm_name": "Hahn Plaza",
+   "approx": false
+  },
+  "McCarthy Quad": {
+   "lat": 34.020937,
+   "lng": -118.283146,
+   "osm": "way/154906727",
+   "osm_name": "McCarthy Quad",
+   "approx": false
+  },
+  "McClintock Lawn": {
+   "lat": 34.025027,
+   "lng": -118.28763,
+   "osm": "way/442277355",
+   "osm_name": "McClintock Hall",
+   "approx": true
+  },
+  "Pardee": {
+   "lat": 34.018601,
+   "lng": -118.286288,
+   "osm": "way/175666298",
+   "osm_name": "Pardee Plaza",
+   "approx": false
+  },
+  "Pardee Lawn": {
+   "lat": 34.018601,
+   "lng": -118.286288,
+   "osm": "way/175666298",
+   "osm_name": "Pardee Plaza",
+   "approx": true
+  },
+  "Meyers Plaza": {
+   "lat": 34.021365,
+   "lng": -118.286288,
+   "osm": "relation/6095459",
+   "osm_name": "Physical Education Building",
+   "approx": true
+  },
+  "Queen's Courtyard": {
+   "lat": 34.022247,
+   "lng": -118.285533,
+   "osm": "relation/6584129",
+   "osm_name": "Queen's Courtyard",
+   "approx": false
+  },
+  "SOS Lawn": {
+   "lat": 34.021581,
+   "lng": -118.283763,
+   "osm": "way/406923937",
+   "osm_name": "Social Sciences Building",
+   "approx": true
+  },
+  "Village Plaza": {
+   "lat": 34.025283,
+   "lng": -118.285111,
+   "osm": "way/642008252",
+   "osm_name": "USC Village Fountain",
+   "approx": true
+  },
+  "Trousdale Parkway": {
+   "line": [
+    [
+     -118.28535,
+     34.0187
+    ],
+    [
+     -118.2853,
+     34.0204
+    ],
+    [
+     -118.28525,
+     34.0226
+    ],
+    [
+     -118.2852,
+     34.0252
+    ]
+   ],
+   "approx": true
+  }
+ },
+ "unresolved": []
+}

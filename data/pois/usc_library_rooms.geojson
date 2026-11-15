@@ -1,0 +1,3464 @@
+{
+ "type": "FeatureCollection",
+ "fetched_at": "2026-11-15T05:46:11+00:00",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.283741,
+     34.020163
+    ]
+   },
+   "properties": {
+    "id": "libcal-18374",
+    "type": "study",
+    "name": "Doheny Memorial Library: East Asian-109C",
+    "source": "USC Libraries LibCal",
+    "library": "Doheny Memorial Library",
+    "building_code": "DOH",
+    "room": "East Asian-109C",
+    "group": "Doheny Collaborative Work Rooms",
+    "capacity": 6,
+    "booking_url": "https://libcal.usc.edu/space/18374",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "12:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "10:00",
+       "12:00"
+      ],
+      [
+       "18:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "09:00",
+       "11:00"
+      ],
+      [
+       "15:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "09:00",
+       "13:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.283741,
+     34.020163
+    ]
+   },
+   "properties": {
+    "id": "libcal-18375",
+    "type": "study",
+    "name": "Doheny Memorial Library: East Asian-109D",
+    "source": "USC Libraries LibCal",
+    "library": "Doheny Memorial Library",
+    "building_code": "DOH",
+    "room": "East Asian-109D",
+    "group": "Doheny Collaborative Work Rooms",
+    "capacity": 6,
+    "booking_url": "https://libcal.usc.edu/space/18375",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "14:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "09:00",
+       "12:00"
+      ],
+      [
+       "16:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "09:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "09:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "09:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "09:00",
+       "17:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.283741,
+     34.020163
+    ]
+   },
+   "properties": {
+    "id": "libcal-18376",
+    "type": "study",
+    "name": "Doheny Memorial Library: East Asian-110A",
+    "source": "USC Libraries LibCal",
+    "library": "Doheny Memorial Library",
+    "building_code": "DOH",
+    "room": "East Asian-110A",
+    "group": "Doheny Collaborative Work Rooms",
+    "capacity": 6,
+    "booking_url": "https://libcal.usc.edu/space/18376",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "14:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "09:00",
+       "11:00"
+      ],
+      [
+       "16:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "09:00",
+       "12:00"
+      ],
+      [
+       "16:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "09:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "09:00",
+       "17:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.283741,
+     34.020163
+    ]
+   },
+   "properties": {
+    "id": "libcal-18377",
+    "type": "study",
+    "name": "Doheny Memorial Library: East Asian-110B",
+    "source": "USC Libraries LibCal",
+    "library": "Doheny Memorial Library",
+    "building_code": "DOH",
+    "room": "East Asian-110B",
+    "group": "Doheny Collaborative Work Rooms",
+    "capacity": 6,
+    "booking_url": "https://libcal.usc.edu/space/18377",
+    "free_slots": {
+     "2026-11-16": [
+      [
+       "09:00",
+       "12:00"
+      ],
+      [
+       "14:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "09:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "09:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "11:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "09:00",
+       "17:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-31391",
+    "type": "study",
+    "name": "Leavey Library: 1st Floor-113B",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "1st Floor-113B",
+    "group": "Leavey Group Study Rooms (1st Floor)",
+    "capacity": 6,
+    "booking_url": "https://libcal.usc.edu/space/31391",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "11:00",
+       "12:00"
+      ],
+      [
+       "18:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "11:00"
+      ],
+      [
+       "12:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "17:00"
+      ],
+      [
+       "20:00",
+       "22:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "09:00"
+      ],
+      [
+       "13:00",
+       "14:00"
+      ],
+      [
+       "15:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "16:00",
+       "18:00"
+      ],
+      [
+       "19:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "11:00"
+      ],
+      [
+       "13:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-35418",
+    "type": "study",
+    "name": "Leavey Library: 1st Floor-113C",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "1st Floor-113C",
+    "group": "Leavey Group Study Rooms (1st Floor)",
+    "capacity": 8,
+    "booking_url": "https://libcal.usc.edu/space/35418",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "10:00"
+      ],
+      [
+       "17:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "13:00"
+      ],
+      [
+       "16:00",
+       "17:00"
+      ],
+      [
+       "20:00",
+       "21:00"
+      ],
+      [
+       "23:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "21:00"
+      ],
+      [
+       "23:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "21:00"
+      ],
+      [
+       "23:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "21:00"
+      ],
+      [
+       "23:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-31392",
+    "type": "study",
+    "name": "Leavey Library: 1st Floor-113D",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "1st Floor-113D",
+    "group": "Leavey Group Study Rooms (1st Floor)",
+    "capacity": 6,
+    "booking_url": "https://libcal.usc.edu/space/31392",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "11:00"
+      ],
+      [
+       "13:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "17:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "16:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "11:00"
+      ],
+      [
+       "15:00",
+       "17:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "14:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-31393",
+    "type": "study",
+    "name": "Leavey Library: 1st Floor-113E",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "1st Floor-113E",
+    "group": "Leavey Group Study Rooms (1st Floor)",
+    "capacity": 6,
+    "booking_url": "https://libcal.usc.edu/space/31393",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "11:00",
+       "12:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "16:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "11:00"
+      ],
+      [
+       "13:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-31394",
+    "type": "study",
+    "name": "Leavey Library: 1st Floor-113F",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "1st Floor-113F",
+    "group": "Leavey Group Study Rooms (1st Floor)",
+    "capacity": 6,
+    "booking_url": "https://libcal.usc.edu/space/31394",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "13:00"
+      ],
+      [
+       "17:00",
+       "18:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "13:00"
+      ],
+      [
+       "17:00",
+       "19:00"
+      ],
+      [
+       "23:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "21:00"
+      ],
+      [
+       "23:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "14:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18361",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-201A",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-201A",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18361",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "11:00"
+      ],
+      [
+       "15:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "21:00"
+      ],
+      [
+       "23:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "15:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "14:00",
+       "15:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18362",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-201B",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-201B",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18362",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "11:00"
+      ],
+      [
+       "13:00",
+       "14:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "02:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "18:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "02:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "18:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "02:00",
+       "14:00"
+      ],
+      [
+       "17:00",
+       "18:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "02:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "20:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18363",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-201C",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-201C",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18363",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "11:00",
+       "13:00"
+      ],
+      [
+       "17:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "14:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "21:00"
+      ],
+      [
+       "23:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "13:00"
+      ],
+      [
+       "16:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18364",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-201E",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-201E",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18364",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "11:00"
+      ],
+      [
+       "17:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "21:00"
+      ],
+      [
+       "23:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "14:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18365",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-201F",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-201F",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18365",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "11:00"
+      ],
+      [
+       "13:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "16:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18366",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-201G",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-201G",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18366",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "08:00"
+      ],
+      [
+       "16:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "22:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "13:00"
+      ],
+      [
+       "14:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18367",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-202B",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-202B",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18367",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "11:00"
+      ],
+      [
+       "13:00",
+       "14:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "09:00"
+      ],
+      [
+       "11:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18368",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-202C",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-202C",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18368",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "13:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "02:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18369",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-202D",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-202D",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18369",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "14:00"
+      ],
+      [
+       "18:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "18:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "14:00"
+      ],
+      [
+       "18:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18370",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-202E",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-202E",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18370",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "11:00",
+       "12:00"
+      ],
+      [
+       "20:00",
+       "22:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "11:00"
+      ],
+      [
+       "15:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "22:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18371",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-202F",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-202F",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18371",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "13:00",
+       "14:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "11:00"
+      ],
+      [
+       "13:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18372",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-202G",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-202G",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18372",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "13:00"
+      ],
+      [
+       "19:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "06:00"
+      ],
+      [
+       "08:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18373",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-202H",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-202H",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18373",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "12:00"
+      ],
+      [
+       "16:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "16:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18360",
+    "type": "study",
+    "name": "Leavey Library: 2nd Floor-202I",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "2nd Floor-202I",
+    "group": "Leavey Group Study Rooms (2nd Floor)",
+    "capacity": 12,
+    "booking_url": "https://libcal.usc.edu/space/18360",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "18:00"
+      ],
+      [
+       "23:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "14:00"
+      ],
+      [
+       "18:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "06:00"
+      ],
+      [
+       "08:00",
+       "11:00"
+      ],
+      [
+       "13:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "13:00"
+      ],
+      [
+       "16:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "16:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18412",
+    "type": "study",
+    "name": "Leavey Library: 3rd Floor- 301C",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "3rd Floor- 301C",
+    "group": "Leavey Group Study Rooms (3rd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18412",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "10:00"
+      ],
+      [
+       "18:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "22:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18413",
+    "type": "study",
+    "name": "Leavey Library: 3rd Floor- 301D",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "3rd Floor- 301D",
+    "group": "Leavey Group Study Rooms (3rd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18413",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "11:00",
+       "12:00"
+      ],
+      [
+       "18:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "10:00"
+      ],
+      [
+       "14:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18414",
+    "type": "study",
+    "name": "Leavey Library: 3rd Floor- 301E",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "3rd Floor- 301E",
+    "group": "Leavey Group Study Rooms (3rd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18414",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "11:00"
+      ],
+      [
+       "17:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "21:00"
+      ],
+      [
+       "23:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "09:00"
+      ],
+      [
+       "13:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "21:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "01:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18415",
+    "type": "study",
+    "name": "Leavey Library: 3rd Floor- 301F",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "3rd Floor- 301F",
+    "group": "Leavey Group Study Rooms (3rd Floor)",
+    "capacity": 5,
+    "booking_url": "https://libcal.usc.edu/space/18415",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "14:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "11:00"
+      ],
+      [
+       "15:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "08:00"
+      ],
+      [
+       "10:00",
+       "12:00"
+      ],
+      [
+       "16:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "11:00"
+      ],
+      [
+       "15:00",
+       "19:00"
+      ],
+      [
+       "21:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-18418",
+    "type": "study",
+    "name": "Leavey Library: 3rd Floor- 302C",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "3rd Floor- 302C",
+    "group": "Leavey Group Study Rooms (3rd Floor)",
+    "capacity": 10,
+    "booking_url": "https://libcal.usc.edu/space/18418",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "12:00"
+      ],
+      [
+       "14:00",
+       "15:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "18:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "02:00",
+       "15:00"
+      ],
+      [
+       "19:00",
+       "22:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "02:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-233278",
+    "type": "study",
+    "name": "Leavey Library: LVL 210-A",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "LVL 210-A",
+    "group": "Leavey Study Pods",
+    "capacity": 1,
+    "booking_url": "https://libcal.usc.edu/space/233278",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "18:00"
+      ],
+      [
+       "19:30",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "02:00",
+       "11:00"
+      ],
+      [
+       "12:00",
+       "13:30"
+      ],
+      [
+       "15:30",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "19:30"
+      ],
+      [
+       "21:30",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "11:00"
+      ],
+      [
+       "13:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-233279",
+    "type": "study",
+    "name": "Leavey Library: LVL 210-B",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "LVL 210-B",
+    "group": "Leavey Study Pods",
+    "capacity": 1,
+    "booking_url": "https://libcal.usc.edu/space/233279",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "11:00"
+      ],
+      [
+       "13:00",
+       "15:00"
+      ],
+      [
+       "17:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "09:30"
+      ],
+      [
+       "11:30",
+       "15:30"
+      ],
+      [
+       "17:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "14:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-233280",
+    "type": "study",
+    "name": "Leavey Library: LVL 210-C",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "LVL 210-C",
+    "group": "Leavey Study Pods",
+    "capacity": 1,
+    "booking_url": "https://libcal.usc.edu/space/233280",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "11:30"
+      ],
+      [
+       "13:30",
+       "15:30"
+      ],
+      [
+       "17:30",
+       "20:00"
+      ],
+      [
+       "22:00",
+       "23:30"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "01:30",
+       "10:00"
+      ],
+      [
+       "12:00",
+       "12:30"
+      ],
+      [
+       "14:30",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "13:00"
+      ],
+      [
+       "14:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "18:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-209556",
+    "type": "study",
+    "name": "Leavey Library: LVL 310-A",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "LVL 310-A",
+    "group": "Leavey Study Pods",
+    "capacity": 1,
+    "booking_url": "https://libcal.usc.edu/space/209556",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "10:00"
+      ],
+      [
+       "11:30",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "16:00"
+      ],
+      [
+       "17:00",
+       "17:30"
+      ],
+      [
+       "18:30",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "08:00"
+      ],
+      [
+       "10:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-233276",
+    "type": "study",
+    "name": "Leavey Library: LVL 310-B",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "LVL 310-B",
+    "group": "Leavey Study Pods",
+    "capacity": 1,
+    "booking_url": "https://libcal.usc.edu/space/233276",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "11:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "11:00"
+      ],
+      [
+       "13:00",
+       "13:30"
+      ],
+      [
+       "15:00",
+       "15:30"
+      ],
+      [
+       "17:30",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "18:30"
+      ],
+      [
+       "20:30",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "08:30"
+      ],
+      [
+       "10:30",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-233277",
+    "type": "study",
+    "name": "Leavey Library: LVL 310-C",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "LVL 310-C",
+    "group": "Leavey Study Pods",
+    "capacity": 1,
+    "booking_url": "https://libcal.usc.edu/space/233277",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "11:30"
+      ],
+      [
+       "15:30",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "11:00"
+      ],
+      [
+       "13:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "17:30"
+      ],
+      [
+       "19:30",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "14:30"
+      ],
+      [
+       "16:30",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "14:00",
+       "18:30"
+      ],
+      [
+       "20:30",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "16:00"
+      ],
+      [
+       "17:00",
+       "17:30"
+      ],
+      [
+       "18:30",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28294,
+     34.021785
+    ]
+   },
+   "properties": {
+    "id": "libcal-211079",
+    "type": "study",
+    "name": "Leavey Library: LVL 310-D",
+    "source": "USC Libraries LibCal",
+    "library": "Leavey Library",
+    "building_code": "LVL",
+    "room": "LVL 310-D",
+    "group": "Leavey Study Pods",
+    "capacity": 1,
+    "booking_url": "https://libcal.usc.edu/space/211079",
+    "free_slots": {
+     "2026-11-15": [
+      [
+       "09:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "17:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-16": [
+      [
+       "00:00",
+       "11:30"
+      ],
+      [
+       "13:30",
+       "22:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "00:00",
+       "12:00"
+      ],
+      [
+       "14:00",
+       "15:30"
+      ],
+      [
+       "17:30",
+       "24:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "00:00",
+       "12:30"
+      ],
+      [
+       "14:30",
+       "24:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.288758,
+     34.019585
+    ]
+   },
+   "properties": {
+    "id": "libcal-117784",
+    "type": "study",
+    "name": "Science & Engineering Library: SSL 208 - Group Study 1",
+    "source": "USC Libraries LibCal",
+    "library": "Science & Engineering Library",
+    "building_code": "SSL",
+    "room": "SSL 208 - Group Study 1",
+    "group": "Group Study Rooms",
+    "capacity": 6,
+    "booking_url": "https://libcal.usc.edu/space/117784",
+    "free_slots": {
+     "2026-11-16": [
+      [
+       "09:00",
+       "12:00"
+      ],
+      [
+       "16:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "09:00",
+       "14:00"
+      ],
+      [
+       "16:00",
+       "17:00"
+      ],
+      [
+       "19:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "09:00",
+       "17:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.288758,
+     34.019585
+    ]
+   },
+   "properties": {
+    "id": "libcal-117785",
+    "type": "study",
+    "name": "Science & Engineering Library: SSL 209 - Group Study 2",
+    "source": "USC Libraries LibCal",
+    "library": "Science & Engineering Library",
+    "building_code": "SSL",
+    "room": "SSL 209 - Group Study 2",
+    "group": "Group Study Rooms",
+    "capacity": 6,
+    "booking_url": "https://libcal.usc.edu/space/117785",
+    "free_slots": {
+     "2026-11-16": [
+      [
+       "09:00",
+       "13:00"
+      ],
+      [
+       "18:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-17": [
+      [
+       "09:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "16:00"
+      ],
+      [
+       "18:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-18": [
+      [
+       "09:00",
+       "11:00"
+      ],
+      [
+       "15:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-19": [
+      [
+       "09:00",
+       "13:00"
+      ],
+      [
+       "15:00",
+       "20:00"
+      ]
+     ],
+     "2026-11-20": [
+      [
+       "09:00",
+       "17:00"
+      ]
+     ]
+    },
+    "availability_window": [
+     "2026-11-14",
+     "2026-11-21"
+    ]
+   }
+  }
+ ]
+}

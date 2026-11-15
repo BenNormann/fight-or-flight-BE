@@ -41,3 +41,18 @@ Imagery © Esri, Maxar, Earthstar Geographics; only derived coordinates are stor
 Method: built by `python -m scripts.build_usc_buildings`. Codes, names, addresses, centre points (the `LAT`/`LON` fields) and entrances come from USC Facilities Planning & Management's public GIS (`https://fpmgis.usc.edu/server/rest/services/USC_FPM/`, the `Building` and `BuildingEntrance` layers). It keeps sites `UPC` and `UPCOFF` and drops demolished or sold buildings, gates, vaults and trailers. Names are title-cased from FPM's upper case. Aliases add OpenStreetMap names for the same buildings, matched by code or by the OSM building's centre falling inside the FPM footprint, plus a short hand-kept list of common names (for example `VKC` for the renamed Von KleinSmid Center, now DMC).
 
 OSM data © OpenStreetMap contributors, ODbL.
+
+## USC campus data (`python -m scripts.usc_data`)
+
+Scrapers in `scripts/usc_data/` (only need `requests`; `osmium` to rebuild places). Run from the repo root, e.g. `python -m scripts.usc_data all`, or one step at a time (`-h` lists them). New POI files land in `pois/` and load with `load_pois` (map layer) and `load_places` (search); tables that aren't map points go to `usc/`.
+
+| Output | Type(s) | Source |
+|---|---|---|
+| `pois/usc_library_rooms.geojson` | `study` | LibCal (`libcal.usc.edu/spaces?lid=2893,2895,13141`): 37 bookable rooms at Doheny, Leavey, Science & Engineering, with capacity, booking link, and `free_slots` per date for the next 7 days |
+| `usc/library_availability.json` | — | same availability by room; re-run `libraries` (e.g. every 15 min) to refresh |
+| `pois/usc_bike_resources.geojson` | `bike_parking` (`rack_status`: current/outdated/informal/locker), `bike_pump`, `bike_service`, `bike_lane`, `bike_transit`, `bike_zone` | USC Bicycle Coalition Google My Map (KML export). **Dated Oct 2015.** |
+| `pois/usc_outdoor_venues.geojson` | `outdoor_venue` | trojanevents.usc.edu outdoor diagrams, with diagram links. Placed via OSM; `location_approx: true` = placed on the adjacent building/plaza. Argue Plaza and Crocker Plaza aren't placed. |
+| `usc/roomfinder_rooms.json` | — | sites.usc.edu/roomfinder (WP REST API): 219 general-use classrooms in 22 buildings, with type, capacity, furniture, equipment, and per-building room counts |
+| `usc/usc_places.json` | — | building code / venue → coordinates from the OSM study-area extract (`places`) |
+
+Room Finder only covers centrally scheduled classrooms; buildings `CHP` (Health Sciences campus), `HED` and `KOH` have no coordinates yet; add them to `CODE_BY_NAME` in `build_places.py`.
