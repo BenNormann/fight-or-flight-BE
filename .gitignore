@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+data/work/
+*.geojsonl
+
+# Large data lives in a GitHub Release, not git (see scripts/fetch_data.sh)
+data/raw/*.gdb.zip
+data/tiles/*.pmtiles

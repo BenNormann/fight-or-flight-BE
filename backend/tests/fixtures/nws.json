@@ -1,0 +1,7 @@
+{"geometry": {"type": "Point", "coordinates": [-118.29, 34.02]},
+ "properties": {"timestamp": "2026-11-14T21:47:00+00:00",
+   "temperature": {"unitCode": "wmoUnit:degC", "value": 18.3},
+   "relativeHumidity": {"unitCode": "wmoUnit:percent", "value": 61.2},
+   "visibility": {"unitCode": "wmoUnit:m", "value": 16090},
+   "windSpeed": {"unitCode": "wmoUnit:km_h-1", "value": 11.2},
+   "precipitationLastHour": {"unitCode": "wmoUnit:mm", "value": null}}}

@@ -1,0 +1,260 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2827514,
+     34.018763
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-001",
+    "type": "seating",
+    "name": null,
+    "table_count_est": 4,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2849884,
+     34.02539
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-002",
+    "type": "seating",
+    "name": null,
+    "table_count_est": 9,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2828131,
+     34.0215552
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-003",
+    "type": "seating",
+    "name": null,
+    "table_count_est": 5,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2820541,
+     34.0215552
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-004",
+    "type": "seating",
+    "name": null,
+    "table_count_est": 6,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2889259,
+     34.0206971
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-005",
+    "type": "seating",
+    "name": null,
+    "table_count_est": 6,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.282443,
+     34.018883
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-006",
+    "type": "seating",
+    "name": null,
+    "table_count_est": 3,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2862276,
+     34.0255345
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-011",
+    "type": "seating",
+    "name": null,
+    "table_count_est": 4,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2874225,
+     34.0204581
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-m1794704046807",
+    "type": "seating",
+    "name": null,
+    "table_count_est": null,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2872361,
+     34.0187986
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-m1794704102225",
+    "type": "seating",
+    "name": null,
+    "table_count_est": null,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2859889,
+     34.0205015
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-m1794704120786",
+    "type": "seating",
+    "name": null,
+    "table_count_est": null,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2827421,
+     34.0206321
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-m1794704187037",
+    "type": "seating",
+    "name": null,
+    "table_count_est": null,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2844339,
+     34.0221682
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-m1794704211466",
+    "type": "seating",
+    "name": null,
+    "table_count_est": null,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2860211,
+     34.0221221
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-m1794704239983",
+    "type": "seating",
+    "name": null,
+    "table_count_est": null,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2901114,
+     34.0217286
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-m1794704546775",
+    "type": "seating",
+    "name": null,
+    "table_count_est": null,
+    "source": "esri-world-imagery+manual-review"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.2902496,
+     34.0219754
+    ]
+   },
+   "properties": {
+    "id": "usc-tbl-m1794704548532",
+    "type": "seating",
+    "name": null,
+    "table_count_est": null,
+    "source": "esri-world-imagery+manual-review"
+   }
+  }
+ ]
+}

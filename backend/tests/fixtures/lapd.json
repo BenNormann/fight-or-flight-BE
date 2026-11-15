@@ -1,0 +1,8 @@
+[
+  {"dr_no": "240104567", "date_occ": "2024-03-01T00:00:00.000", "time_occ": "2330", "crm_cd": "330",
+   "crm_cd_desc": "BURGLARY FROM VEHICLE", "part_1_2": "1", "lat": "34.0250", "lon": "-118.2840", "area_name": "Southwest"},
+  {"dr_no": "240104568", "date_occ": "2024-03-01T00:00:00.000", "time_occ": "1200", "crm_cd": "624",
+   "crm_cd_desc": "BATTERY - SIMPLE ASSAULT", "part_1_2": "2", "lat": "0", "lon": "0"},
+  {"dr_no": "240104569", "date_occ": "2024-03-01T00:00:00.000", "time_occ": "0815", "crm_cd": "510",
+   "crm_cd_desc": "VEHICLE - STOLEN", "part_1_2": "1", "lat": "34.1478", "lon": "-118.1445"}
+]
