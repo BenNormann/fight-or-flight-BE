@@ -51,12 +51,21 @@ def dist_to_bluelight_m(lat: float, lon: float) -> float:
     return min(haversine_m(lat, lon, a, b) for a, b, _ in bluelight_phones())
 
 
+def in_radius(lat: float, lon: float) -> bool:
+    return haversine_m(lat, lon, *config.CENTER) <= config.RADIUS_M
+
+
 @lru_cache(maxsize=1)
 def area_cells() -> list[str]:
-    """Every res-9 H3 cell whose centre falls inside the bbox, sorted."""
-    s, w, n, e = config.BBOX
-    poly = h3.LatLngPoly([(s, w), (s, e), (n, e), (n, w)])
-    return sorted(h3.polygon_to_cells(poly, config.H3_RES))
+    """Every H3 cell whose centre falls inside the RADIUS_MILES circle, sorted."""
+    lat0, lon0 = config.CENTER
+    ring = []
+    for k in range(128):  # 128-gon approximation of the circle
+        a = 2 * math.pi * k / 128
+        dlat = config.RADIUS_M * math.cos(a) / 111_320.0
+        dlon = config.RADIUS_M * math.sin(a) / (111_320.0 * math.cos(math.radians(lat0)))
+        ring.append((lat0 + dlat, lon0 + dlon))
+    return sorted(h3.polygon_to_cells(h3.LatLngPoly(ring), config.H3_RES))
 
 
 @lru_cache(maxsize=4096)
