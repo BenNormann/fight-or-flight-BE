@@ -1,66 +1,81 @@
 # SafeRoute crime-risk model: results
 
-Model: XGBoost classifier on H3 res-9 cell × clock-hour × date rows, USC area
-(116 cells, ~0.1 km² each). Target: at least one LAPD-reported incident in that
-cell during that hour. Reproduce with `python -m models.train_xgb`; numbers
-below come from `models/artifacts/metrics.json`.
+Model: XGBoost classifier on H3 res-9 cell × clock-hour × date rows, for the
+**10-mile circle around USC**. Target: at least one LAPD-reported incident in
+that cell during that hour. Reproduce with `python -m algorithm.models.train_xgb`.
+The numbers below come from `models/artifacts/metrics.json`. For the full
+walkthrough with plots, see `../explore_train_infer.ipynb`.
+
+## Area and data
+
+- 6,898 H3 cells lie within 10 miles. **3,432 are modelled**, meaning they had
+  at least 5 LAPD incidents in 2020–2022.
+- The other 3,466 cells are mostly other police jurisdictions (Inglewood,
+  Culver City, Beverly Hills, Vernon, LA County Sheriff areas). They are
+  reported as `no_data`, never as safe.
+- 647,921 incidents, 2020–2024. Training uses 2020-04 to 2022-12: 1.76M rows,
+  with 288k positives plus 5 sampled negatives per positive.
 
 ## Out-of-time evaluation
 
-Every metric is on the **full grid** for the year (every cell × hour × day, no
-negative sampling), using data the model never trained on.
+The full 2023 grid has about 30M cell-hours. Evaluation keeps every
+incident cell-hour plus 10 sampled negatives each, and weights the negatives
+by 1/sample rate. Every metric below is therefore a **full-grid estimate**.
 
-### 2023 test year (1,016,160 cell-hours, 7,438 with an incident, base rate 0.73%)
+### 2023 test year (30.1M cell-hours, 142,201 with an incident, base rate 0.47%)
 
 | Model | ROC-AUC | PR-AUC | Brier | Top-10% capture* |
 |---|---|---|---|---|
-| **XGBoost** | **0.686** | 0.0169 | **0.0072** | **27.9%** |
-| sklearn GradientBoostingClassifier | 0.669 | 0.0139 | 0.0094 | 24.0% |
-| Baseline: past-year count in cell at this hour ±1 | 0.674 | 0.0175 | n/a | 27.1% |
+| **XGBoost** | **0.786** | **0.0273** | 0.0047 | **41.5%** |
+| sklearn GradientBoostingClassifier | 0.783 | 0.0235 | 0.0047 | 40.9% |
+| Baseline: past-12-month count in cell at this hour ±1 | 0.772 | 0.0261 | n/a | 40.4% |
 
-\* Share of all incident cell-hours that fall in the 10% of cell-hours the model ranks riskiest.
+\* The share of all incident cell-hours that fall in the 10% of cell-hours the
+model ranks riskiest.
 
-Heatmap-level check: averaging predictions per (cell, hour of day) over 2023 and
-comparing with the observed incident count per slot gives a Spearman rank
-correlation of **0.69**.
+Heatmap-level check: summing predictions per (cell, hour of day) over 2023 and
+comparing them with observed counts gives a Spearman rank correlation of **0.72**.
 
-### 2024 extra check (1,018,944 cell-hours, base rate 0.47%)
+### 2024 extra check (30.1M cell-hours, base rate 0.25%)
 
 | Model | ROC-AUC | PR-AUC | Top-10% capture |
 |---|---|---|---|
-| **XGBoost** | **0.722** | **0.0144** | **32.0%** |
-| sklearn GradientBoostingClassifier | 0.676 | 0.0090 | 23.7% |
-| Baseline (past-year count) | 0.705 | 0.0129 | 31.3% |
+| **XGBoost** | **0.803** | **0.0202** | **47.0%** |
+| sklearn GradientBoostingClassifier | 0.796 | 0.0145 | 45.4% |
+| Baseline | 0.787 | 0.0194 | 44.7% |
 
-2024 has roughly half the reported volume after March because LAPD switched to
-NIBRS reporting, so its base rate is lower. The model still ranks well there,
-and it slightly over-predicts on average (0.61% predicted vs 0.47% observed).
+In 2024 the model over-predicts on average (0.38% predicted vs 0.25%
+observed). This is expected: the 2024 drop is LAPD's NIBRS reporting change,
+not less crime.
 
-## What this means
+## What changed vs the USC-only model
 
-- Predicting whether a crime is reported in one 175 m hex in one specific hour
-  is very noisy. PR-AUC is about 2.3× the base rate, and that is realistic for
-  this granularity.
-- XGBoost beats sklearn's GradientBoosting on every metric. It ranks about as
-  well as a strong "same place, same hour, last year" heuristic, and adds three
-  things the heuristic can't: **calibrated probabilities**, **per-score SHAP
-  explanations**, and a place to plug in new signals (streetlights, weather,
-  foot traffic).
-- Calibration on 2023 is close to the diagonal across all ten deciles (see
-  `calibration.png`). Predicted 0.19% → observed 0.14%, predicted 2.06% → observed 2.04%.
+- AUC rose from 0.69 to 0.79, because the area now runs from quiet residential
+  blocks to downtown and Hollywood. Ranking across very different places is
+  easier than ranking within a few blocks of campus.
+- XGBoost still beats sklearn's GradientBoosting and the past-year baseline on
+  every metric.
+- Calibration on 2023 stays close to the diagonal across all deciles. For
+  example, a predicted 0.04% came out as 0.03% observed, and a predicted 2.01%
+  came out as 1.85% observed.
 
-## Feature importance (mean |SHAP|, log-odds, 2023 sample)
+## Feature importance (mean |SHAP|, log-odds, 2023 grid-weighted sample)
 
 ![SHAP summary](shap_summary.png)
 
-1. `hour`: late afternoon through night raises risk, early morning lowers it
-2. `cell_rate_all`: long-run incident rate in the cell
-3. `cell_hourband_rate_all`: long-run rate in the cell at this hour ±1
-4. `cell_90d`: recent 90-day count
-5. `area_7d`: area-wide activity last week (also absorbs reporting-volume drift)
+1. `cell_rate_all`: the cell's long-run incident rate
+2. `hour`: time of day
+3. `cell_90d`: the cell's count over the last 90 days
+4. `cell_hourband_rate_all`: the cell's long-run rate at this hour ±1
+5. `cell_30d`, `cell_hourband_365d`, `cell_7d`: recent counts
 
-`is_dark` ranks low because `hour` already carries most of the light/dark
-signal. The blue-light phone distance uses **placeholder** coordinates (see
-README), so read its SHAP value with that in mind.
+## Caveats
+
+- **Saturation:** `risk` is a percentile over the whole 10-mile area, so busy
+  areas such as downtown, Hollywood and Koreatown sit at or near 1.0 all day.
+  To compare blocks inside a busy area, use `prob`, or a percentile
+  computed only over the route's neighbourhood.
+- Blue-light phone coordinates are still **placeholders**, so ignore
+  `dist_bluelight_m` until the real ones are loaded.
 
 ![Calibration](calibration.png)
