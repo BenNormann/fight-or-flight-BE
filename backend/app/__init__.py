@@ -1,6 +1,7 @@
 import logging
 
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .auth import frontend_origins, init_oauth
 from .config import Config
@@ -11,6 +12,9 @@ def create_app(config_object=Config, **overrides):
     app = Flask(__name__)
     app.config.from_object(config_object)
     app.config.update(overrides)
+    # Behind nginx (TLS terminated there): trust one proxy's X-Forwarded-For/Proto/Host, so
+    # url_for(_external=True) builds https:// URLs, e.g. the OAuth callback sent to Google.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 

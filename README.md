@@ -149,7 +149,29 @@ Setup (`.env`):
   which signs in any `@usc.edu` address without Google, for testing the FE end to end.
 
 Without `SECRET_KEY` and the Google client, `/auth/me` answers `401` and `/auth/login` redirects back
-with `error=unavailable`.
+with `error=unavailable`. Sign-in also stays disabled if `SECRET_KEY` is shorter than 32 characters, contains
+spaces, or starts with `#` (an `.env` comment read as the value).
+
+### Deploying auth (nginx + HTTPS, frontend on its own domain)
+
+- **nginx must forward the scheme:** `proxy_set_header X-Forwarded-Proto $scheme;` and `proxy_set_header Host $host;`.
+  The app trusts one proxy's `X-Forwarded-*` headers (werkzeug `ProxyFix`), so the callback it sends to Google
+  is `https://...`. Without the header, Google refuses the plain-http callback (`redirect_uri_mismatch`).
+- **Google console:** OAuth client (Web application) with these Authorized redirect URIs, exact match, no trailing slash:
+  `https://<host>/api/v1/auth/callback` (production) and `http://localhost:5000/api/v1/auth/callback` (local).
+  Set `OAUTH_REDIRECT_URI` to the production one.
+- **Frontend on a different domain:** choose one.
+  1. **Recommended: the frontend host proxies `/api`.** E.g. a Vercel rewrite of `/api/:path*` to
+     `https://<backend host>/api/:path*`. The browser sees one origin, so the cookie is first-party and works in
+     Safari/Firefox, CORS isn't involved, and `SESSION_COOKIE_SAMESITE=Lax` stays.
+     Use `OAUTH_REDIRECT_URI=https://<frontend host>/api/v1/auth/callback` and register that URI in Google.
+  2. **The frontend calls the API host directly.** Set `FRONTEND_ORIGINS=https://<frontend host>`,
+     `SESSION_COOKIE_SAMESITE=None`, `SESSION_COOKIE_SECURE=true`, and `OAUTH_REDIRECT_URI=https://<backend host>/api/v1/auth/callback`.
+     The cookie is then third-party: Safari (all iPhones) and Firefox block it by default, so sign-in can
+     appear to succeed while `/auth/me` keeps answering `401`.
+- In both cases, put the frontend's URL in `FRONTEND_ORIGINS` (it is also the allow-list for `next`). CORS on
+  `/api/*` only allows those origins.
+- `authlib` is a new dependency: deploy with `docker compose up -d --build`.
 
 ## Risk model integration
 

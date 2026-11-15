@@ -4,12 +4,15 @@ allow-list, `next` validation and the session user.
 The session is Flask's signed cookie (httpOnly). It holds only the signed-in user's public
 profile, keyed by Google's stable `sub`; nothing is stored server-side.
 """
+import logging
 from urllib.parse import urlencode, urlsplit
 
 from authlib.integrations.flask_client import OAuth
 from flask import current_app, session
 
 GOOGLE_METADATA_URL = "https://accounts.google.com/.well-known/openid-configuration"
+MIN_SECRET_KEY_LENGTH = 32
+log = logging.getLogger(__name__)
 SESSION_USER = "user"
 SESSION_NEXT = "auth_next"
 
@@ -33,9 +36,22 @@ def frontend_origins(app=None):
     return [o.strip().rstrip("/") for o in raw.split(",") if o.strip()]
 
 
+def secret_key_ok():
+    """SECRET_KEY signs the session cookie: anyone who knows it can forge a session. Reject short
+    or placeholder values (e.g. an .env comment read as the value)."""
+    key = current_app.config.get("SECRET_KEY") or ""
+    if not key:
+        return False
+    if len(key) < MIN_SECRET_KEY_LENGTH or key.lstrip().startswith("#") or any(ch.isspace() for ch in key):
+        log.warning("SECRET_KEY is set but unsafe (needs >= %d chars, no spaces/comment); sign-in disabled",
+                    MIN_SECRET_KEY_LENGTH)
+        return False
+    return True
+
+
 def oauth_configured():
     c = current_app.config
-    return bool(c["SECRET_KEY"] and c["GOOGLE_CLIENT_ID"] and c["GOOGLE_CLIENT_SECRET"])
+    return bool(secret_key_ok() and c["GOOGLE_CLIENT_ID"] and c["GOOGLE_CLIENT_SECRET"])
 
 
 def _origin_of(url):

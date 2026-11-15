@@ -1,3 +1,4 @@
+from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 import pytest
@@ -6,7 +7,8 @@ from flask import redirect
 from app import create_app
 
 FE = "http://localhost:5173"
-SETTINGS = dict(TESTING=True, SECRET_KEY="test-secret", GOOGLE_CLIENT_ID="cid", GOOGLE_CLIENT_SECRET="csecret",
+SECRET = "test-secret-0123456789-abcdefghijklmnop"  # >= 32 chars, like production
+SETTINGS = dict(TESTING=True, SECRET_KEY=SECRET, GOOGLE_CLIENT_ID="cid", GOOGLE_CLIENT_SECRET="csecret",
                 FRONTEND_ORIGINS=f"{FE},https://fof.example.edu")
 
 
@@ -189,3 +191,48 @@ def test_dev_login_when_enabled():
     resp = client.get("/api/v1/auth/dev/login", query_string={"email": "A@usc.edu", "next": f"{FE}/route"})
     assert resp.headers["Location"] == f"{FE}/route"
     assert client.get("/api/v1/auth/me").get_json()["email"] == "a@usc.edu"
+
+
+def test_callback_url_is_https_behind_nginx(setup):
+    """nginx terminates TLS and forwards plain HTTP; ProxyFix must honour X-Forwarded-Proto/Host,
+    or Google rejects the http:// redirect_uri (redirect_uri_mismatch)."""
+    client, fake = setup
+    client.get("/api/v1/auth/login", headers={
+        "Host": "trojan-odyssey.northcentralus.cloudapp.azure.com", "X-Forwarded-Proto": "https"})
+    assert fake.redirect_args[0] == "https://trojan-odyssey.northcentralus.cloudapp.azure.com/api/v1/auth/callback"
+
+
+def test_callback_url_follows_frontend_proxy_host(setup):
+    """Frontend host proxying /api (e.g. Vercel rewrite) forwards its own host: the callback stays first-party."""
+    client, fake = setup
+    client.get("/api/v1/auth/login", headers={
+        "Host": "trojan-odyssey.northcentralus.cloudapp.azure.com", "X-Forwarded-Proto": "https",
+        "X-Forwarded-Host": "fof.example.edu"})
+    assert fake.redirect_args[0] == "https://fof.example.edu/api/v1/auth/callback"
+
+
+@pytest.mark.parametrize("weak", [
+    "short-secret",
+    "# required for sign-in; same value on every API process",   # .env comment read as the value
+    "x" * 20 + " " + "y" * 20,
+])
+def test_weak_secret_key_disables_sign_in(weak):
+    app, _ = make_app(SECRET_KEY=weak)
+    url, q = query(app.test_client().get("/api/v1/auth/login", query_string={"next": f"{FE}/"}))
+    assert url == f"{FE}/login" and q["error"] == "unavailable"
+
+
+def test_weak_secret_key_disables_dev_login():
+    app, _ = make_app(SECRET_KEY="short", AUTH_DEV_LOGIN=True)
+    _, q = query(app.test_client().get("/api/v1/auth/dev/login", query_string={"email": "a@usc.edu"}))
+    assert q["error"] == "unavailable"
+
+
+def test_env_example_has_no_inline_comments():
+    """Compose turns `KEY=   # comment` into the value '# comment' (this once set a public SECRET_KEY)."""
+    path = Path(__file__).resolve().parents[2] / ".env.example"
+    if not path.exists():
+        pytest.skip(".env.example not available (backend-only checkout)")
+    bad = [line for line in path.read_text().splitlines()
+           if not line.lstrip().startswith("#") and "=" in line and "#" in line.split("=", 1)[1]]
+    assert not bad, bad

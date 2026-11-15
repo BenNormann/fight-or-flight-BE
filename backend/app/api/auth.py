@@ -12,7 +12,7 @@ from flask import current_app, redirect, request, session, url_for
 from flask_smorest import Blueprint, abort
 
 from ..auth import (SESSION_NEXT, current_user, email_allowed, google_client, login_error_url, oauth_configured,
-                    safe_next, start_session, userinfo_allowed)
+                    safe_next, secret_key_ok, start_session, userinfo_allowed)
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ def login():
     """Full-page redirect to Google. `next` = absolute FE URL to return to (allow-listed origins only)."""
     nxt = safe_next(request.args.get("next"))
     if not oauth_configured():
-        log.warning("sign-in requested but SECRET_KEY / GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET are not set")
+        log.warning("sign-in requested but SECRET_KEY / GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET are missing or unsafe")
         return _no_store(redirect(login_error_url("unavailable", nxt)))
     session[SESSION_NEXT] = nxt
     redirect_uri = current_app.config["OAUTH_REDIRECT_URI"] or url_for("auth.callback", _external=True)
@@ -92,7 +92,7 @@ def dev_login():
     if not current_app.config["AUTH_DEV_LOGIN"]:
         abort(404)
     nxt = safe_next(request.args.get("next"))
-    if not current_app.config["SECRET_KEY"]:
+    if not secret_key_ok():
         return _no_store(redirect(login_error_url("unavailable", nxt)))
     email = (request.args.get("email") or "").strip().lower()
     if not email_allowed(email):
