@@ -152,7 +152,7 @@ el("path", {d:`M${D.center[0]-6},${D.center[1]}h12M${D.center[0]},${D.center[1]-
 let hour = D.hour, pinned = null, current = null;
 const slider = document.getElementById("hour"); slider.value = hour;
 const hh = h => String(h).padStart(2,"0") + ":00";
-function paint(){ paths.forEach((p,i) => p.classList.toggle("zone", !!D.tiles[i].z); p.setAttribute("fill", color(D.tiles[i].r[hour])));
+function paint(){ paths.forEach((p,i) => { p.classList.toggle("zone", !!D.tiles[i].z); p.setAttribute("fill", color(D.tiles[i].r[hour])); });
   document.getElementById("title").textContent = `Risk at ${hh(hour)} on ${D.date}`;
   document.getElementById("sub").textContent = `${D.tiles.length.toLocaleString()} tiles (H3 res ${D.res}) within ${D.radius} miles of USC; crime history as of ${D.history_as_of}`;
   document.getElementById("hl").textContent = hh(hour);
