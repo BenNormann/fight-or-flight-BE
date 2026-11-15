@@ -13,7 +13,9 @@ Explain one score from the command line:
 
 Two numbers come out of the model:
   prob  calibrated probability that >=1 incident is reported in that cell
-        during that hour on that date (usually 0.1%-3%).
+        during that hour on that date (usually 0.1%-3%), multiplied by the
+        blue-light factor (up to 25% lower right next to a USC emergency
+        phone; see config.BLUELIGHT_*).
   risk  0..1 relative score = where `prob` falls among all modelled
         cell-hours in the 2023 test year (0.9 = riskier than 90% of them).
         This is what the heatmap and routing should use.
@@ -33,30 +35,27 @@ import numpy as np
 import pandas as pd
 import xgboost as xgb
 
-from algorithm.common import config
+from algorithm.common import config, geo
 from algorithm.features.build_dataset import History
 
 LABELS = {
     "hour": "time of day",
     "weekday": "day of week",
     "month": "month",
-    "season": "season",
     "is_weekend": "weekend",
     "is_dark": "after dark",
     "cell_lat": "location (north/south)",
     "cell_lon": "location (east/west)",
     "dist_bluelight_m": "distance to blue-light phone",
-    "cell_7d": "incidents here, last 7 days",
-    "cell_30d": "incidents here, last 30 days",
-    "cell_90d": "incidents here, last 90 days",
-    "cell_sev_90d": "severity-weighted incidents here, 90 days",
-    "cell_violent_90d": "violent incidents here, 90 days",
+    "harm_7d": "recent serious crime here (last ~2 weeks)",
+    "harm_30d": "recent serious crime here (last ~2 months)",
+    "harm_30d_tod": "recent serious crime here around this time of day",
+    "harm_365d_tod": "serious crime here around this time of day, past year+",
+    "nb1_harm_30d": "recent serious crime in adjacent blocks",
+    "nb2_harm_30d": "recent serious crime 2 blocks away",
     "cell_hourband_365d": "incidents here at this hour, past year",
     "cell_rate_all": "long-run incident rate here",
     "cell_hourband_rate_all": "long-run rate here at this hour",
-    "nb1_30d": "incidents in adjacent blocks, 30 days",
-    "nb2_30d": "incidents 2 blocks away, 30 days",
-    "nb1_90d": "incidents in adjacent blocks, 90 days",
     "area_7d": "area-wide incidents, last 7 days",
 }
 
@@ -110,9 +109,11 @@ def _frame(cells, hours, date, context_features=None):
 
 
 def _predict(X, with_contribs=False):
+    """prob = model probability x blue-light factor (see config.BLUELIGHT_*),
+    so a nearby phone always lowers the served score."""
     booster, meta, _ = _load()
     dm = xgb.DMatrix(X)
-    prob = _prob(booster.predict(dm), meta["neg_rate"])
+    prob = _prob(booster.predict(dm), meta["neg_rate"]) * geo.bluelight_factor(X["dist_bluelight_m"].to_numpy())
     risk = _risk(prob, meta)
     if not with_contribs:
         return prob, risk, None
@@ -169,9 +170,14 @@ def explain_cell(h3_id: str, hour: int, date=None, context_features: dict | None
     order = np.argsort(-np.abs(contribs[0]))[:top_k]
     _, meta, _ = _load()
     feats = meta["features"]
+    dist = float(X["dist_bluelight_m"].iloc[0])
     return {
         "cell": h3_id, "hour": int(hour), "date": date.isoformat(),
         "risk": round(float(risk[0]), 4), "prob": round(float(prob[0]), 5), "status": "ok",
+        # Per-incident weighted history (severity x recency x time-of-day match):
+        "harm_score": round(float(X["harm_30d_tod"].iloc[0]), 3),
+        "bluelight": {"dist_m": round(dist), "protection": round(geo.bluelight_protection(dist), 3),
+                      "factor": round(float(geo.bluelight_factor(dist)), 3)},
         "history_as_of": (_history_day(date) - dt.timedelta(days=1)).isoformat(),
         "factors": [{
             "feature": feats[j], "label": LABELS.get(feats[j], feats[j]),
@@ -202,7 +208,10 @@ def build_cache(date=None, top_k: int = 3) -> dict:
             idx = np.argsort(-np.abs(row))[:top_k]
             tops.append([[int(j), round(float(row[j]), 3)] for j in idx])
         lat, lon = h3.cell_to_latlng(c)
+        dist = float(X["dist_bluelight_m"].iloc[i * 24])
         out[c] = {"lat": round(lat, 6), "lon": round(lon, 6),
+                  "bluelight_dist_m": round(dist),
+                  "bluelight_protection": round(geo.bluelight_protection(dist), 3),
                   "risk": np.round(risk[sl], 4).tolist(),
                   "prob": np.round(prob[sl], 5).tolist(),
                   "top_factors": tops}
@@ -212,8 +221,8 @@ def build_cache(date=None, top_k: int = 3) -> dict:
         "h3_res": meta["h3_res"], "target": meta["target"],
         "history_as_of": (_history_day(date) - dt.timedelta(days=1)).isoformat(),
         "center": meta.get("center"), "radius_miles": meta.get("radius_miles"),
-        "risk_definition": "percentile of calibrated incident probability among "
-                           "modelled cell-hours in 2023 (0..1)",
+        "risk_definition": "percentile of calibrated incident probability (with the "
+                           "blue-light factor) among modelled cell-hours in 2023 (0..1)",
         "features": feats,
         "feature_labels": LABELS,
         "cells": out,
