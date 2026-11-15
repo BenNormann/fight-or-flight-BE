@@ -1,3 +1,4 @@
+from datetime import timedelta
 import os
 
 
@@ -6,6 +7,10 @@ def _env(name, default, cast=str):
     if val is None or val == "":
         return default
     return cast(val)
+
+
+def _bool(val):
+    return str(val).strip().lower() in ("1", "true", "yes", "on")
 
 
 class Config:
@@ -41,6 +46,22 @@ class Config:
     HTTP_TIMEOUT = _env("HTTP_TIMEOUT", 15, int)
 
     ADMIN_TOKEN = _env("ADMIN_TOKEN", "")
+
+    # Sign-in (Google OAuth, USC accounts only) and the session cookie. See README "Auth".
+    SECRET_KEY = _env("SECRET_KEY", "")                   # signs the session cookie; required for sign-in
+    GOOGLE_CLIENT_ID = _env("GOOGLE_CLIENT_ID", "")
+    GOOGLE_CLIENT_SECRET = _env("GOOGLE_CLIENT_SECRET", "")
+    OAUTH_REDIRECT_URI = _env("OAUTH_REDIRECT_URI", "")   # empty = this API's /api/v1/auth/callback
+    AUTH_ALLOWED_DOMAIN = _env("AUTH_ALLOWED_DOMAIN", "usc.edu")
+    # FE origins: CORS allow-list (with credentials) and the only places `next` may point to
+    FRONTEND_ORIGINS = _env("FRONTEND_ORIGINS", "http://localhost:5173,http://localhost:4173")
+    AUTH_DEV_LOGIN = _env("AUTH_DEV_LOGIN", False, _bool)  # local testing without Google; never in production
+    SESSION_COOKIE_NAME = "fof_session"
+    SESSION_COOKIE_HTTPONLY = True
+    # FE on another site (production): SESSION_COOKIE_SAMESITE=None and SESSION_COOKIE_SECURE=true
+    SESSION_COOKIE_SAMESITE = _env("SESSION_COOKIE_SAMESITE", "Lax")
+    SESSION_COOKIE_SECURE = _env("SESSION_COOKIE_SECURE", False, _bool)
+    PERMANENT_SESSION_LIFETIME = timedelta(days=_env("SESSION_DAYS", 7, int))
 
     # flask-smorest / OpenAPI
     API_TITLE = "USC Safe-Route Data API"
