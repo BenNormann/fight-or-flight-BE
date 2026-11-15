@@ -107,6 +107,10 @@ Add a source by subclassing `Ingestor` (`backend/app/ingestion/base.py`), implem
 | `GET /risk/hotzones?hour=&date=&bbox=&min_risk=` | **heatmap**: risk for every modelled cell at an hour, plus `no_data_cells` |
 | `GET /risk/edges?hour=&date=&lambda=&format=parquet\|csv\|json` | **route costs** for every walk-graph edge: `cost = length_m × (1 + λ·risk)` |
 | `POST /admin/ingest/{source}` | run one ingestor now (`X-Admin-Token` if `ADMIN_TOKEN` is set) |
+| `GET /auth/login?next=<FE url>` | full-page redirect to Google sign-in (see [Auth](#auth)) |
+| `GET /auth/callback` | Google returns here; sets the session cookie, redirects to `next` |
+| `GET /auth/me` | `{id, email, name, picture}` when signed in, `401` otherwise |
+| `POST /auth/logout` | `204`, clears the session |
 
 `bbox` is `minLng,minLat,maxLng,maxLat`. Times are ISO-8601, interpreted as UTC if no offset is given.
 
@@ -114,6 +118,38 @@ Add a source by subclassing `Ingestor` (`backend/app/ingestion/base.py`), implem
 # training pull for the ML service
 curl -o features.parquet "localhost:5000/api/v1/features?from=2026-11-01T00:00:00Z&format=parquet"
 ```
+
+## Auth
+
+Sign-in is Google OpenID Connect, limited to `@usc.edu` Workspace accounts. Reads stay public.
+
+1. The FE sends the browser to `/api/v1/auth/login?next=<absolute FE URL>`.
+2. Google signs the user in and returns to `/api/v1/auth/callback`. The backend checks the ID token
+   (`email_verified`, email domain and Workspace `hd` must all be `usc.edu`), then sets the session
+   cookie `fof_session` (Flask's signed cookie, httpOnly, 7 days) and redirects to `next`.
+3. Refused or failed sign-in redirects to the FE's `/login?error=domain|cancelled|failed|unavailable`.
+4. The FE asks `GET /api/v1/auth/me` who is signed in (`401` = signed out); `POST /api/v1/auth/logout` ends it.
+
+`next` must be on an origin in `FRONTEND_ORIGINS` (otherwise it falls back to that list's first
+origin), and CORS allows only those origins, with credentials. The session stores only the user's
+public profile, keyed by Google's stable `sub`; there is no users table yet.
+
+Setup (`.env`):
+
+- `SECRET_KEY`: long random string (`python -c "import secrets; print(secrets.token_urlsafe(48))"`).
+  The same value on every API process, or sessions break between them.
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: Google Cloud console > APIs & Services > Credentials >
+  OAuth client ID (Web application). Authorized redirect URI: `http://localhost:5000/api/v1/auth/callback`
+  locally, your API's `/api/v1/auth/callback` in production (also set `OAUTH_REDIRECT_URI` to it
+  when behind a proxy).
+- `FRONTEND_ORIGINS`: comma-separated FE origins. Default `http://localhost:5173,http://localhost:4173`.
+- FE on a different site than the API (production): `SESSION_COOKIE_SAMESITE=None` and
+  `SESSION_COOKIE_SECURE=true` (HTTPS only).
+- `AUTH_DEV_LOGIN=true` (local only, never in production) adds `GET /api/v1/auth/dev/login?email=&next=`,
+  which signs in any `@usc.edu` address without Google, for testing the FE end to end.
+
+Without `SECRET_KEY` and the Google client, `/auth/me` answers `401` and `/auth/login` redirects back
+with `error=unavailable`.
 
 ## Risk model integration
 
