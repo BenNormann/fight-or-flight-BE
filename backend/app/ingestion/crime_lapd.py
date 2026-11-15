@@ -36,7 +36,13 @@ class SocrataCrimeIngestor(Ingestor):
     lon_field = "lon"
     id_field = ""
 
+    def __init__(self, since: datetime | None = None):
+        self.since_override = since  # one-off backfills (scripts/backfill_crime.py)
+
     def _since(self) -> datetime:
+        if self.since_override:
+            return self.since_override.replace(tzinfo=LA_TZ) if self.since_override.tzinfo is None \
+                else self.since_override
         latest = db.session.execute(
             text("SELECT max(ts) FROM crime_incidents WHERE source = :s"), {"s": self.name}
         ).scalar()

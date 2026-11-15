@@ -1,11 +1,13 @@
 FROM python:3.12-slim AS app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 FLASK_APP=wsgi:app
 WORKDIR /app
-COPY requirements.txt .
+# Build context = repo root, so the risk model package (algorithm/) ships in the image
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
+COPY backend/ /app/
+COPY algorithm/ /app/algorithm/
 EXPOSE 5000
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "wsgi:app"]
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "wsgi:app"]
 
 # ---- tippecanoe build (only used by the `tools` target) ----
 FROM debian:bookworm-slim AS tippecanoe-build

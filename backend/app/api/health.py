@@ -21,4 +21,6 @@ def health():
         SELECT DISTINCT ON (source) source, status, started_at, finished_at, rows, error
         FROM ingest_runs ORDER BY source, started_at DESC
     """)
-    return {"status": "ok", "db": "ok" if db_ok else "error", "ingestors": last_runs}
+    from ..services import risk_model
+    return {"status": "ok", "db": "ok" if db_ok else "error", "ingestors": last_runs,
+            "risk_model": risk_model.status()}

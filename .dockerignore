@@ -1,0 +1,12 @@
+# Build context is the repo root (backend + algorithm); keep big/irrelevant stuff out
+.git
+data
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.ipynb_checkpoints
+**/.venv
+algorithm/data/*.db
+algorithm/notebooks
+algorithm/*.ipynb
+algorithm/models/artifacts/dataset.parquet
