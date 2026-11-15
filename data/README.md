@@ -4,7 +4,7 @@
 |---|---|---|
 | `pois/*.geojson` | yes | points of interest, loaded by `python -m scripts.load_pois` (and into search by `load_places`) |
 | `places/usc_buildings.geojson` | yes | USC campus buildings with codes, for search (`python -m scripts.load_places`) |
-| `usc_google_maps_places.geojson` | from the `data/usc-google-maps-places` branch (23 MB) | Google Maps places for search (`python -m scripts.load_places`); schema in `GOOGLE_MAPS_PLACES.md` on that branch |
+| `usc_google_maps_places.geojson` | yes (23 MB) | Google Maps places for search (`python -m scripts.load_places`); schema in `GOOGLE_MAPS_PLACES.md` |
 | `raw/usc_roads.osm.pbf` | yes | OSM roads clipped to the study circle + 1.5 km (`scripts/fetch_osm.sh`) |
 | `raw/LARIAC6_Buildings_2020.gdb.zip` | no (Release) | LA County building outlines (`./scripts/fetch_data.sh`) |
 | `tiles/buildings.pmtiles` | no (Release) | 3D building tiles |
@@ -27,8 +27,7 @@ Imagery © Esri, Maxar, Earthstar Geographics; only derived coordinates are stor
 
 `python -m scripts.load_places` fills the `places` table that place search runs on, from three sources:
 
-- `usc_google_maps_places.geojson` (kind `place`): until that branch is merged, extract it with
-  `git show fork/data/usc-google-maps-places:data/usc_google_maps_places.geojson > data/usc_google_maps_places.geojson`.
+- `usc_google_maps_places.geojson` (kind `place`), 15,343 places scraped 2026-11-14 (see `GOOGLE_MAPS_PLACES.md`).
   Places outside the 5-mile study area are skipped (the file reaches 10 miles); `--all-areas` keeps them.
   Read as UTF-8: hours use U+202F before AM/PM and an en dash between times.
 - `places/usc_buildings.geojson` (kind `building`): see below.
