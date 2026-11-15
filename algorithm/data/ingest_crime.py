@@ -4,7 +4,7 @@ Usage (from the repo root):
     python -m algorithm.data.ingest_crime
 
 Pulls every incident inside config.RADIUS_MILES of USC for 2020-2024
-(~550k rows for 10 miles, ~5 min). Each run is a full refresh.
+(~400k rows for 5 miles, ~1 min). Each run is a full refresh.
 
 Source: LA City Open Data, "Crime Data from 2020 to Present"
 (Socrata dataset 2nrs-mtv8, https://data.lacity.org/resource/2nrs-mtv8.json).
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS incidents (
     weapon_used_cd TEXT,
     part_1_2       TEXT,
     cell           TEXT NOT NULL,     -- H3 res 9
-    tier           TEXT NOT NULL      -- violent / property / other
+    tier           TEXT NOT NULL      -- violent / property / other (charts only; the model uses common/severity.py scores)
 );
 CREATE INDEX IF NOT EXISTS idx_inc_cell_date ON incidents(cell, date_occ);
 CREATE INDEX IF NOT EXISTS idx_inc_date ON incidents(date_occ);
@@ -95,7 +95,7 @@ def to_record(row):
         row.get("crm_cd"), row.get("crm_cd_desc"), row.get("weapon_used_cd"),
         row.get("part_1_2"),
         h3.latlng_to_cell(lat, lon, config.H3_RES),
-        severity_tier(row.get("crm_cd_desc")),
+        severity_tier(row.get("crm_cd_desc"), row.get("crm_cd"), row.get("weapon_used_cd")),
     )
 
 
