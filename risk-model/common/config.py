@@ -62,17 +62,24 @@ SEED = 42
 MIN_CELL_INCIDENTS = 5
 
 # ---- Per-incident weights (see common/severity.py for the full formula) -----
-# Each past crime counts severity x recency x time-of-day match:
-#   recency   = 0.5 ** (age_days / half_life): a crime HALF_LIFE days ago counts
-#               half as much as one yesterday. Three horizons let the model mix
-#               "what happened lately" with "what this place is always like":
-#                 7 days   -> a crime 3 weeks ago counts 1/8
-#                 30 days  -> the main "recent" signal; 90 days ago counts 1/8
-#                 365 days -> a slow, chronic-hotspot memory
+# Each past crime counts severity x recency x time-of-day match.
+#
+# Recency is LOGARITHMIC (a power law), not a fixed half-life:
+#     recency(age) = 1 / (1 + age_days / RECENCY_TAU_DAYS) ** RECENCY_POWER
+# so the weight drops by the same factor every time a crime's age multiplies:
+#     1 day 0.75 | 1 week 0.30 | 1 month 0.09 | 3 months 0.03 | 1 year 0.008
+# A crime yesterday counts ~8x one from last month and ~90x one from last
+# year, so recent crime moves the score far more than old crime. The long tail
+# still lets a year-old shooting count a little; the long-run count features
+# (cell_rate_all, ...) carry the place's baseline.
+# (Implementation: the curve is fitted as a sum of exponentials, RECENCY_BASIS
+# half-lives, so it can be updated day by day; max error ~1.5%.)
+RECENCY_TAU_DAYS = 3.0
+RECENCY_POWER = 1.0
+RECENCY_BASIS = (0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024)
 #   time of day = exp(-dh**2 / (2 * TOD_SIGMA_HOURS**2)), dh = circular hour gap.
 #               With sigma = 2 h a crime 2 h away counts 0.61, 4 h away 0.14,
 #               6 h away 0.01, so a 10 pm row mostly sees evening crimes.
-HALF_LIFE_DAYS = {"7d": 7, "30d": 30, "365d": 365}
 TOD_SIGMA_HOURS = 2.0
 
 # ---- Blue-light phones: an explicit, protective effect -------------------
@@ -94,8 +101,7 @@ BLUELIGHT_RANGE_M = 150.0
 # phone => never safer). A safety app must never say "more violent crime here,
 # so lower risk", which unconstrained trees can do with correlated features.
 MONOTONE_INCREASING = [
-    "harm_7d", "harm_30d", "harm_30d_tod", "harm_365d_tod",
-    "nb1_harm_30d", "nb2_harm_30d",
+    "harm_recent", "harm_recent_tod", "nb1_harm_recent", "nb2_harm_recent",
     "cell_hourband_365d", "cell_rate_all", "cell_hourband_rate_all",
     "dist_bluelight_m",
 ]

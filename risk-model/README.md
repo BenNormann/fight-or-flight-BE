@@ -49,10 +49,11 @@ All (~2 min). Its sections are:
 8. **Sanity checks** on the saved model, each printing PASS or FLAG: dangerous vs quiet places, most-harm vs quietest cells, predicted vs actual per cell, monotonicity, blue-light, time of day.
 9. **Model evaluation summary:** the final metrics table and decile calibration.
 
-`risk_map_interactive.ipynb` is a separate hover map: move the mouse over a tile
-to see its final risk, probability, top reasons and nearest blue-light phone,
-with an hour slider and the tile's 24-hour curve. It needs `ipympl`
-(`pip install seaborn ipympl ipywidgets`, then restart Jupyter).
+`risk_map_interactive.ipynb` (or `python -m algorithm.scoring.risk_map --open`)
+writes `notebooks/risk_map.html`: a hover map of the final scores. Hover a tile
+to see its risk, probability, top reasons and nearest blue-light phone; drag
+the slider to change the hour. It's plain SVG + JavaScript, so it opens in any
+browser with no extra packages.
 
 ## Project structure
 
@@ -77,7 +78,7 @@ fight-or-flight-BE/
     │   └── cache/risk_cache.json   every modelled cell x 24 h, precomputed
     ├── notebooks/                  model_report.md + SHAP / calibration plots
     ├── explore_train_infer.ipynb   interactive explore -> train -> evaluate -> infer
-    ├── risk_map_interactive.ipynb  hover map of the final risk scores (seaborn + ipympl)
+    ├── risk_map_interactive.ipynb  writes + opens the hover map (scoring/risk_map.py)
     ├── MODEL_GUIDE.md          how to train, run, and call the model (inference parameters)
     └── requirements.txt
 ```

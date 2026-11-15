@@ -10,6 +10,3 @@ shap>=0.45
 matplotlib>=3.8
 joblib>=1.3
 scipy>=1.11
-seaborn>=0.13
-ipympl>=0.9
-ipywidgets>=8.0

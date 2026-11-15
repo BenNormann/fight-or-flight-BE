@@ -3,7 +3,7 @@
 Every incident gets its own weight in the model's history features:
 
     weight_i(row) = severity_i                       (this file)
-                  x 0.5 ** (age_days / half_life)    (recency, config.HALF_LIFE_*)
+                  x 1 / (1 + age_days / tau)         (log-scale recency, config.RECENCY_*)
                   x exp(-dh**2 / (2 * sigma**2))     (time of day, config.TOD_SIGMA_HOURS)
 
 where `age_days` is how long before the row's date the crime happened and `dh`

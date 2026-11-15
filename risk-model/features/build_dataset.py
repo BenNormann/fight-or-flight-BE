@@ -7,9 +7,10 @@ Each row is one (H3 cell, date, hour). Target = 1 if at least one incident was
 reported in that cell during that clock hour on that date.
 
 History features are per-incident weighted sums (see common/severity.py):
-each past crime counts  severity x 0.5**(age_days / half_life) x
+each past crime counts  severity x 1 / (1 + age_days / tau) x
 exp(-hour_gap**2 / (2 sigma**2)), so recent, serious crimes at a similar time
-of day dominate. Half-lives and sigma live in common/config.py.
+of day dominate. The recency curve is logarithmic (a power law); tau, the
+power and sigma live in common/config.py.
 
 Leakage rule: every history feature for a row on date D uses ONLY incidents
 from before D (decayed sums and daily windows end the day before; hour-of-day
@@ -43,13 +44,30 @@ FEATURES = [
     "hour", "weekday", "month", "is_weekend", "is_dark",
     # where
     "cell_lat", "cell_lon", "dist_bluelight_m",
-    # per-incident weighted history: severity x recency (x time of day)
-    "harm_7d", "harm_30d", "harm_30d_tod", "harm_365d_tod",
-    "nb1_harm_30d", "nb2_harm_30d",
+    # per-incident weighted history: severity x log-scale recency (x time of day)
+    "harm_recent", "harm_recent_tod", "nb1_harm_recent", "nb2_harm_recent",
     # plain long-run counts (the place's baseline)
     "cell_hourband_365d", "cell_rate_all", "cell_hourband_rate_all",
     "area_7d",
 ]
+
+
+def recency_weight(age_days, tau=config.RECENCY_TAU_DAYS, power=config.RECENCY_POWER):
+    """Target recency curve: 1 / (1 + age/tau) ** power (log-scale decay)."""
+    return (1.0 + np.asarray(age_days, dtype=float) / tau) ** -power
+
+
+def recency_mixture(basis=config.RECENCY_BASIS):
+    """Weights a_k so that sum_k a_k * 0.5**(age/basis_k) ~= recency_weight(age)
+    for ages 1 day .. 4 years (non-negative least squares on relative error).
+    Exponentials can be updated day by day, which keeps the feature pass O(days)."""
+    from scipy.optimize import nnls
+    hl = np.asarray(basis, dtype=float)
+    age = np.unique(np.round(np.logspace(0, np.log10(1500), 200)))
+    target = recency_weight(age)
+    A = 0.5 ** (age[:, None] / hl[None, :])
+    a, _ = nnls(A / target[:, None], np.ones(len(age)))
+    return dict(zip(hl.tolist(), a.astype(np.float32)))
 
 
 def tod_kernel(sigma=config.TOD_SIGMA_HOURS) -> np.ndarray:
@@ -142,7 +160,8 @@ class History:
         order = np.argsort(di, kind="stable")
         self._inc_c, self._inc_h, self._inc_s = ci[order], hi[order], sev[order]
         self._day_start = np.searchsorted(di[order], np.arange(self.n_days + 1))
-        self._decay = {k: np.float32(0.5 ** (1.0 / hl)) for k, hl in config.HALF_LIFE_DAYS.items()}
+        self._mix = {hl: a for hl, a in recency_mixture().items() if a > 1e-6}
+        self._decay = {hl: np.float32(0.5 ** (1.0 / hl)) for hl in self._mix}
         self.K = tod_kernel()
         self.n_universe = nu
         self._state_cache = {}  # day -> decayed states, for repeated live queries
@@ -177,9 +196,10 @@ class History:
         return P[ci, d] - P[ci, np.clip(d - w, 0, None)]
 
     def harm_states(self, days):
-        """Yield (day, {half-life key: S}) for each requested day (ascending),
-        where S[c, h] is the decayed severity sum of crimes before `day`.
-        One forward pass over the calendar; cost ~ n_days, not n_rows."""
+        """Yield (day, {half-life: S}) for each requested day (ascending), where
+        S[c, h] is the exponentially decayed severity sum of crimes before `day`.
+        One forward pass over the calendar; cost ~ n_days, not n_rows.
+        recent_state() mixes them into the log-scale recency curve."""
         days = np.unique(np.clip(np.asarray(days), 0, self.n_days))
         S = {k: np.zeros((self.n_universe, 24), np.float32) for k in self._decay}
         cur = 0
@@ -193,30 +213,32 @@ class History:
                 cur += 1
             yield d, S
 
+    def recent_state(self, S):
+        """Sum of severity x recency_weight(age) per (cell, hour)."""
+        return sum(a * S[hl] for hl, a in self._mix.items())
+
     def _harm_features(self, ci, d, hi):
         out = {f: np.zeros(len(ci), np.float32) for f in
-               ("harm_7d", "harm_30d", "harm_30d_tod", "harm_365d_tod", "nb1_harm_30d", "nb2_harm_30d")}
+               ("harm_recent", "harm_recent_tod", "nb1_harm_recent", "nb2_harm_recent")}
         rows_by_day = pd.Series(np.arange(len(ci))).groupby(d).indices
         if len(rows_by_day) == 1:  # live scoring: one day, reuse its state
             day = next(iter(rows_by_day))
             if day not in self._state_cache:
                 if len(self._state_cache) >= 4:
                     self._state_cache.pop(next(iter(self._state_cache)))
-                self._state_cache[day] = {k: v.copy() for k, v in next(self.harm_states([day]))[1].items()}
+                self._state_cache[day] = {"recent": self.recent_state(next(self.harm_states([day]))[1])}
             states = [(day, self._state_cache[day])]
         else:
-            states = self.harm_states(list(rows_by_day))
+            states = ((day, {"recent": self.recent_state(S)}) for day, S in self.harm_states(list(rows_by_day)))
         for day, S in states:
             r = rows_by_day[day]
             c, h = ci[r], hi[r]
-            k = self.K[h]                                    # (n, 24) time-of-day weights
-            day30 = S["30d"].sum(axis=1)
-            out["harm_7d"][r] = S["7d"][c].sum(axis=1)
-            out["harm_30d"][r] = day30[c]
-            out["harm_30d_tod"][r] = (S["30d"][c] * k).sum(axis=1)
-            out["harm_365d_tod"][r] = (S["365d"][c] * k).sum(axis=1)
-            out["nb1_harm_30d"][r] = (self.R1 @ day30)[c]
-            out["nb2_harm_30d"][r] = (self.R2 @ day30)[c]
+            R_ = S["recent"]                                  # (cells, 24) log-decayed severity
+            allday = R_.sum(axis=1)
+            out["harm_recent"][r] = allday[c]
+            out["harm_recent_tod"][r] = (R_[c] * self.K[h]).sum(axis=1)   # x time-of-day weights
+            out["nb1_harm_recent"][r] = (self.R1 @ allday)[c]
+            out["nb2_harm_recent"][r] = (self.R2 @ allday)[c]
         return out
 
     def features(self, ci, di, hi, dates=None) -> pd.DataFrame:
