@@ -1,0 +1,422 @@
+{
+ "type": "FeatureCollection",
+ "fetched_at": "2026-11-15T05:47:16+00:00",
+ "source_url": "https://trojanevents.usc.edu/venues/outdoor-venues/outdoor-diagrams/",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.284859,
+     34.019562
+    ]
+   },
+   "properties": {
+    "id": "venue-ahf",
+    "type": "outdoor_venue",
+    "name": "AHF",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2023/01/AHF-SW-Corner.jpg"
+    ],
+    "location_approx": true,
+    "osm": "way/154906674"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28452,
+     34.020638
+    ]
+   },
+   "properties": {
+    "id": "venue-alumni-park",
+    "type": "outdoor_venue",
+    "name": "Alumni Park",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://fpm.usc.edu/wp-content/uploads/2021/10/Alumni-Park.pdf"
+    ],
+    "location_approx": false,
+    "osm": "way/154906676"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.285947,
+     34.021185
+    ]
+   },
+   "properties": {
+    "id": "venue-associates-park",
+    "type": "outdoor_venue",
+    "name": "Associates Park",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://fpm.usc.edu/wp-content/uploads/2021/10/Associates-Park.pdf"
+    ],
+    "location_approx": false,
+    "osm": "way/154906798"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.283925,
+     34.021713
+    ]
+   },
+   "properties": {
+    "id": "venue-bogardus-courtyard",
+    "type": "outdoor_venue",
+    "name": "Bogardus Courtyard",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2024/07/Bogardus-Courtyard.jpg"
+    ],
+    "location_approx": false,
+    "osm": "relation/6584127"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.283708,
+     34.022365
+    ]
+   },
+   "properties": {
+    "id": "venue-cas-lawn",
+    "type": "outdoor_venue",
+    "name": "CAS Lawn",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://fpm.usc.edu/wp-content/uploads/2021/10/CAS-Lawn.pdf"
+    ],
+    "location_approx": true,
+    "osm": "way/406923888"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.283722,
+     34.021163
+    ]
+   },
+   "properties": {
+    "id": "venue-dr-medicine-crow",
+    "type": "outdoor_venue",
+    "name": "Dr. Medicine Crow",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://fpm.usc.edu/wp-content/uploads/2021/10/VKC-Courtyard.pdf"
+    ],
+    "location_approx": true,
+    "osm": "relation/6095465"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.285243,
+     34.021703
+    ]
+   },
+   "properties": {
+    "id": "venue-e-f-hutton",
+    "type": "outdoor_venue",
+    "name": "E.F. Hutton",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2024/07/E.F.-Hutton-Park.jpg"
+    ],
+    "location_approx": false,
+    "osm": "way/154906721"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.285243,
+     34.021703
+    ]
+   },
+   "properties": {
+    "id": "venue-founders-park",
+    "type": "outdoor_venue",
+    "name": "Founders Park",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2024/07/Founders-Park_2.jpg"
+    ],
+    "location_approx": true,
+    "osm": "way/154906721"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.285215,
+     34.026722
+    ]
+   },
+   "properties": {
+    "id": "venue-great-lawn",
+    "type": "outdoor_venue",
+    "name": "Great Lawn",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2022/10/GreatLawn.jpg"
+    ],
+    "location_approx": false,
+    "osm": "way/727000078"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28527,
+     34.020383
+    ]
+   },
+   "properties": {
+    "id": "venue-hahn-plaza",
+    "type": "outdoor_venue",
+    "name": "Hahn Plaza",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2022/09/HANH.jpg"
+    ],
+    "location_approx": false,
+    "osm": "way/442277347"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.283146,
+     34.020937
+    ]
+   },
+   "properties": {
+    "id": "venue-mccarthy-quad",
+    "type": "outdoor_venue",
+    "name": "McCarthy Quad",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2024/07/McCarthy-Quad.jpg"
+    ],
+    "location_approx": false,
+    "osm": "way/154906727"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.28763,
+     34.025027
+    ]
+   },
+   "properties": {
+    "id": "venue-mcclintock-lawn",
+    "type": "outdoor_venue",
+    "name": "McClintock Lawn",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2022/10/McCLINTOCK-Lawn_at_USC_Village.jpg"
+    ],
+    "location_approx": true,
+    "osm": "way/442277355"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.286288,
+     34.018601
+    ]
+   },
+   "properties": {
+    "id": "venue-pardee",
+    "type": "outdoor_venue",
+    "name": "Pardee",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2023/01/Pardee-Plaza.jpg"
+    ],
+    "location_approx": false,
+    "osm": "way/175666298"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.286288,
+     34.018601
+    ]
+   },
+   "properties": {
+    "id": "venue-pardee-lawn",
+    "type": "outdoor_venue",
+    "name": "Pardee Lawn",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2025/06/Pardee-Lawn.jpg"
+    ],
+    "location_approx": true,
+    "osm": "way/175666298"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.286288,
+     34.021365
+    ]
+   },
+   "properties": {
+    "id": "venue-meyers-plaza",
+    "type": "outdoor_venue",
+    "name": "Meyers Plaza",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2022/10/PED-Meyer-Plaza-1.jpg"
+    ],
+    "location_approx": true,
+    "osm": "relation/6095459"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.285533,
+     34.022247
+    ]
+   },
+   "properties": {
+    "id": "venue-queen-s-courtyard",
+    "type": "outdoor_venue",
+    "name": "Queen's Courtyard",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2022/09/queens.jpg"
+    ],
+    "location_approx": false,
+    "osm": "relation/6584129"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.283763,
+     34.021581
+    ]
+   },
+   "properties": {
+    "id": "venue-sos-lawn",
+    "type": "outdoor_venue",
+    "name": "SOS Lawn",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2023/01/UPC-NA-FMS-CE-Civil-Site-Plan-Event-SOS-East.jpg"
+    ],
+    "location_approx": true,
+    "osm": "way/406923937"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -118.28535,
+      34.0187
+     ],
+     [
+      -118.2853,
+      34.0204
+     ],
+     [
+      -118.28525,
+      34.0226
+     ],
+     [
+      -118.2852,
+      34.0252
+     ]
+    ]
+   },
+   "properties": {
+    "id": "venue-trousdale-parkway",
+    "type": "outdoor_venue",
+    "name": "Trousdale Parkway",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2024/07/Trousdale-Parkway-Quadrant-1_rev.jpg",
+     "https://trojanevents.usc.edu/wp-content/uploads/2024/07/Trousdale-Parkway-Quadrant-2_rev.jpg",
+     "https://trojanevents.usc.edu/wp-content/uploads/2024/07/Trousdale-Parkway-Quadrant-3_re.jpg",
+     "https://trojanevents.usc.edu/wp-content/uploads/2024/07/Trousdale-Parkway-Quadrant-4_re.jpg"
+    ],
+    "location_approx": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -118.285111,
+     34.025283
+    ]
+   },
+   "properties": {
+    "id": "venue-village-plaza",
+    "type": "outdoor_venue",
+    "name": "Village Plaza",
+    "source": "USC Trojan Event Services",
+    "diagram_urls": [
+     "https://trojanevents.usc.edu/wp-content/uploads/2022/10/Village-Plaza-diagram.jpg"
+    ],
+    "location_approx": true,
+    "osm": "way/642008252"
+   }
+  }
+ ]
+}
