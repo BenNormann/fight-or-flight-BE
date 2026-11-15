@@ -6,11 +6,16 @@ Usage (from the repo root, after algorithm.data.ingest_crime):
 Each row is one (H3 cell, date, hour). Target = 1 if at least one incident was
 reported in that cell during that clock hour on that date.
 
-Leakage rule: every history feature for a row on date D uses ONLY incidents
-from before D (daily windows end the day before; hour-of-day windows end at
-the start of D's month). Nothing from the row's own day leaks in.
+History features are per-incident weighted sums (see common/severity.py):
+each past crime counts  severity x 0.5**(age_days / half_life) x
+exp(-hour_gap**2 / (2 sigma**2)), so recent, serious crimes at a similar time
+of day dominate. Half-lives and sigma live in common/config.py.
 
-Scale: the 10-mile area has ~3,500 covered cells x 1,827 days x 24 hours
+Leakage rule: every history feature for a row on date D uses ONLY incidents
+from before D (decayed sums and daily windows end the day before; hour-of-day
+windows end at the start of D's month). Nothing from the row's own day leaks in.
+
+Scale: the 5-mile area has ~1,450 covered cells x 1,827 days x 24 hours
 (~150M cell-hours), so nothing here materialises the full grid. Positives come
 straight from the incident list; negatives are sampled uniformly from the grid.
 Training keeps NEG_PER_POS negatives per positive; evaluation frames keep more
@@ -31,15 +36,28 @@ import pandas as pd
 from scipy import sparse
 
 from algorithm.common import config, geo
+from algorithm.common.severity import incident_severity
 
 FEATURES = [
-    "hour", "weekday", "month", "season", "is_weekend", "is_dark",
+    # when
+    "hour", "weekday", "month", "is_weekend", "is_dark",
+    # where
     "cell_lat", "cell_lon", "dist_bluelight_m",
-    "cell_7d", "cell_30d", "cell_90d", "cell_sev_90d", "cell_violent_90d",
+    # per-incident weighted history: severity x recency (x time of day)
+    "harm_7d", "harm_30d", "harm_30d_tod", "harm_365d_tod",
+    "nb1_harm_30d", "nb2_harm_30d",
+    # plain long-run counts (the place's baseline)
     "cell_hourband_365d", "cell_rate_all", "cell_hourband_rate_all",
-    "nb1_30d", "nb2_30d", "nb1_90d",
     "area_7d",
 ]
+
+
+def tod_kernel(sigma=config.TOD_SIGMA_HOURS) -> np.ndarray:
+    """K[h, h'] = weight a crime at hour h' gets for a row at hour h."""
+    h = np.arange(24)
+    gap = np.abs(h[:, None] - h[None, :])
+    gap = np.minimum(gap, 24 - gap)
+    return np.exp(-gap ** 2 / (2 * sigma ** 2)).astype(np.float32)
 
 
 class History:
@@ -48,7 +66,8 @@ class History:
 
     def __init__(self, db_path=config.DB_PATH):
         con = sqlite3.connect(db_path)
-        inc = pd.read_sql("SELECT date_occ, hour, cell, tier FROM incidents", con)
+        inc = pd.read_sql("SELECT date_occ, hour, cell, tier, crm_cd, crm_cd_desc, weapon_used_cd "
+                          "FROM incidents", con)
         con.close()
 
         self.start = dt.date.fromisoformat(config.DATA_START)
@@ -74,7 +93,9 @@ class History:
         ci = inc["cell"].map(self.cidx).to_numpy()
         di = inc["d"].to_numpy()
         hi = inc["hour"].to_numpy()
-        w = inc["tier"].map(config.SEVERITY_WEIGHT).to_numpy()
+        keys = inc[["crm_cd", "crm_cd_desc", "weapon_used_cd"]].drop_duplicates()
+        keys["sev"] = [incident_severity(c, d, w) for c, d, w in keys.itertuples(index=False)]
+        sev = inc.merge(keys, on=["crm_cd", "crm_cd_desc", "weapon_used_cd"], how="left")["sev"].to_numpy(np.float32)
         viol = (inc["tier"] == "violent").to_numpy()
 
         def daily_of(weights=None, mask=None):
@@ -89,8 +110,6 @@ class History:
 
         daily = daily_of()
         self.P_daily = prefix(daily)
-        self.P_sev = prefix(daily_of(weights=w))
-        self.P_viol = prefix(daily_of(mask=viol))
         self.P_area = np.concatenate([[0], np.cumsum(daily[: len(self.cells)].sum(axis=0))])
 
         # Hour-of-day history at monthly resolution: M[c, m, h] = incidents in
@@ -115,8 +134,18 @@ class History:
                     r2r.append(i); r2c.append(self.cidx[n])
         R1 = sparse.csr_matrix((np.ones(len(r1r), np.float32), (r1r, r1c)), shape=(nu, nu))
         R2 = sparse.csr_matrix((np.ones(len(r2r), np.float32), (r2r, r2c)), shape=(nu, nu))
-        self.P_nb1 = prefix(np.asarray(R1 @ daily, dtype=np.float32))
-        self.P_nb2 = prefix(np.asarray(R2 @ daily, dtype=np.float32))
+        self.R1, self.R2 = R1, R2
+
+        # Per-incident weighted history. Incidents sorted by day so the decay
+        # pass can add one day at a time: S[c, h] = sum of severity x decay over
+        # crimes in cell c at hour h on days before the current day.
+        order = np.argsort(di, kind="stable")
+        self._inc_c, self._inc_h, self._inc_s = ci[order], hi[order], sev[order]
+        self._day_start = np.searchsorted(di[order], np.arange(self.n_days + 1))
+        self._decay = {k: np.float32(0.5 ** (1.0 / hl)) for k, hl in config.HALF_LIFE_DAYS.items()}
+        self.K = tod_kernel()
+        self.n_universe = nu
+        self._state_cache = {}  # day -> decayed states, for repeated live queries
 
         cent = np.array([h3.cell_to_latlng(c) for c in self.universe])
         self.cell_lat, self.cell_lon = cent[:, 0], cent[:, 1]
@@ -146,6 +175,49 @@ class History:
     @staticmethod
     def _win(P, ci, d, w):
         return P[ci, d] - P[ci, np.clip(d - w, 0, None)]
+
+    def harm_states(self, days):
+        """Yield (day, {half-life key: S}) for each requested day (ascending),
+        where S[c, h] is the decayed severity sum of crimes before `day`.
+        One forward pass over the calendar; cost ~ n_days, not n_rows."""
+        days = np.unique(np.clip(np.asarray(days), 0, self.n_days))
+        S = {k: np.zeros((self.n_universe, 24), np.float32) for k in self._decay}
+        cur = 0
+        for d in days:
+            while cur < d:
+                a, b = self._day_start[cur], self._day_start[cur + 1]
+                for k, lam in self._decay.items():
+                    if b > a:
+                        np.add.at(S[k], (self._inc_c[a:b], self._inc_h[a:b]), self._inc_s[a:b])
+                    S[k] *= lam  # crimes on day `cur` are 1 day old at `cur + 1`
+                cur += 1
+            yield d, S
+
+    def _harm_features(self, ci, d, hi):
+        out = {f: np.zeros(len(ci), np.float32) for f in
+               ("harm_7d", "harm_30d", "harm_30d_tod", "harm_365d_tod", "nb1_harm_30d", "nb2_harm_30d")}
+        rows_by_day = pd.Series(np.arange(len(ci))).groupby(d).indices
+        if len(rows_by_day) == 1:  # live scoring: one day, reuse its state
+            day = next(iter(rows_by_day))
+            if day not in self._state_cache:
+                if len(self._state_cache) >= 4:
+                    self._state_cache.pop(next(iter(self._state_cache)))
+                self._state_cache[day] = {k: v.copy() for k, v in next(self.harm_states([day]))[1].items()}
+            states = [(day, self._state_cache[day])]
+        else:
+            states = self.harm_states(list(rows_by_day))
+        for day, S in states:
+            r = rows_by_day[day]
+            c, h = ci[r], hi[r]
+            k = self.K[h]                                    # (n, 24) time-of-day weights
+            day30 = S["30d"].sum(axis=1)
+            out["harm_7d"][r] = S["7d"][c].sum(axis=1)
+            out["harm_30d"][r] = day30[c]
+            out["harm_30d_tod"][r] = (S["30d"][c] * k).sum(axis=1)
+            out["harm_365d_tod"][r] = (S["365d"][c] * k).sum(axis=1)
+            out["nb1_harm_30d"][r] = (self.R1 @ day30)[c]
+            out["nb2_harm_30d"][r] = (self.R2 @ day30)[c]
+        return out
 
     def features(self, ci, di, hi, dates=None) -> pd.DataFrame:
         """Feature frame for index arrays (cell idx, day idx, hour).
@@ -178,27 +250,20 @@ class History:
         yrs = np.maximum(d, 1) / 365.0
         months_yrs = np.maximum(m, 1) / 12.0
 
+        harm = self._harm_features(ci, d, hi)
         X = pd.DataFrame({
             "hour": hi,
             "weekday": weekday,
             "month": month,
-            "season": (month % 12) // 3,
             "is_weekend": (weekday >= 5).astype(np.int8),
             "is_dark": is_dark,
             "cell_lat": self.cell_lat[ci],
             "cell_lon": self.cell_lon[ci],
             "dist_bluelight_m": self.dist_bl[ci],
-            "cell_7d": self._win(self.P_daily, ci, d, 7),
-            "cell_30d": self._win(self.P_daily, ci, d, 30),
-            "cell_90d": self._win(self.P_daily, ci, d, 90),
-            "cell_sev_90d": self._win(self.P_sev, ci, d, 90),
-            "cell_violent_90d": self._win(self.P_viol, ci, d, 90),
+            **harm,
             "cell_hourband_365d": band12,
             "cell_rate_all": self.P_daily[ci, d] / yrs,
             "cell_hourband_rate_all": band_all / months_yrs,
-            "nb1_30d": self._win(self.P_nb1, ci, d, 30),
-            "nb2_30d": self._win(self.P_nb2, ci, d, 30),
-            "nb1_90d": self._win(self.P_nb1, ci, d, 90),
             "area_7d": self.P_area[d] - self.P_area[np.clip(d - 7, 0, None)],
         })
         return X[FEATURES].astype("float32")
