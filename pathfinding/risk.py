@@ -8,6 +8,11 @@ Cells with no LAPD data (other police jurisdictions) and cells outside the
 model area get NO_DATA_RISK (0.5, neutral), so a route never prefers a place
 just because nothing is known about it. Routes report how much of their
 length ran through such cells.
+
+Cells inside the USC University Park Campus and USC Village outlines
+(campus.py) are risk 0 at every hour, whatever the cache says. They are
+recomputed from those outlines at the grid's resolution, so this works on
+res 9 and res 10 alike.
 """
 import json
 import warnings
@@ -18,6 +23,8 @@ import h3
 import numpy as np
 
 from algorithm.common import config
+
+from .campus import zero_risk_cells
 
 NO_DATA_RISK = 0.5
 
@@ -41,7 +48,9 @@ class RiskGrid:
         return h3.latlng_to_cell(lat, lon, self.res)
 
     def risk(self, h3_id: str, hour: int):
-        """(risk 0..1, known?) for a cell at a clock hour."""
+        """(risk 0..1, known?) for a cell at a clock hour. Campus/Village cells are 0."""
+        if h3_id in zero_risk_cells(self.res):
+            return 0.0, True
         r = self.cells.get(h3_id)
         if r is None:
             return self.no_data_risk, False

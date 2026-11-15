@@ -24,6 +24,16 @@ import h3
 from algorithm.common import config, geo
 
 
+def zero_risk_cells(res):
+    """Cells inside the USC campus / USC Village outlines (pathfinding/campus.py),
+    which routing treats as risk 0. Empty if pathfinding isn't importable."""
+    try:
+        from pathfinding.campus import zero_risk_cells as cells
+    except ImportError:
+        return frozenset()
+    return cells(int(res))
+
+
 def load_scores(date=None):
     """The cache dict (see score.build_cache) for `date`; rebuilt if needed."""
     if config.CACHE_PATH.exists():
@@ -49,6 +59,7 @@ def _projector(width=900):
 def build_html(cache=None, date=None, hour=22, top_k=3) -> str:
     cache = cache or load_scores(date)
     proj, W, H = _projector()
+    zero = zero_risk_cells(cache.get("h3_res", config.H3_RES))
 
     def path(c):
         pts = [proj(lat, lng) for lat, lng in h3.cell_to_boundary(c)]
@@ -57,6 +68,11 @@ def build_html(cache=None, date=None, hour=22, top_k=3) -> str:
     feats, labels = cache["features"], cache["feature_labels"]
     tiles = []
     for c, v in cache["cells"].items():
+        if c in zero:  # USC campus / Village: shown at 0, as routing scores it
+            tiles.append({"id": c, "d": path(c), "r": [0.0] * 24, "p": v["prob"], "z": 1,
+                          "bl": v.get("bluelight_dist_m"), "pn": v.get("bluelight_phones_150m", 0),
+                          "pd": 0, "f": [[] for _ in range(24)]})
+            continue
         tiles.append({
             "id": c, "d": path(c), "r": v["risk"], "p": v["prob"],
             "bl": v.get("bluelight_dist_m"),
@@ -93,6 +109,7 @@ _TEMPLATE = r"""<!doctype html>
   h1{font-size:18px;margin:0 0 4px} .muted{color:#6b7280;font-size:12px}
   svg{width:100%;height:auto;display:block}
   path.t{stroke:#fff;stroke-width:.4;cursor:pointer} path.t:hover{stroke:#1d4ed8;stroke-width:2}
+  path.zone{stroke:#047857;stroke-width:1.2}
   path.sel{stroke:#1d4ed8!important;stroke-width:2.5!important}
   #tip{position:fixed;pointer-events:none;background:#fff;border:1px solid #9ca3af;border-radius:6px;
        padding:6px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);display:none;white-space:nowrap}
@@ -112,7 +129,7 @@ _TEMPLATE = r"""<!doctype html>
       <input id="hour" type="range" min="0" max="23" step="1">
       <div class="bar"></div><div class="row muted"><span>0 safest</span><span>risk</span><span>1 riskiest</span></div>
       <div class="muted" style="margin-top:6px">Grey = no LAPD data (another police department): unknown, not safe.
-      Blue dots = USC blue-light phones. Click a tile to pin it.</div>
+      Blue dots = USC blue-light phones. Green outline = USC campus / USC Village, set to 0 (zero risk for routing). Click a tile to pin it.</div>
     </div>
     <div class="card" id="detail"><span class="muted">Hover a tile to see its score.</span></div>
     <div class="card"><b>24-hour risk</b> <span class="muted" id="cid"></span>
@@ -135,7 +152,7 @@ el("path", {d:`M${D.center[0]-6},${D.center[1]}h12M${D.center[0]},${D.center[1]-
 let hour = D.hour, pinned = null, current = null;
 const slider = document.getElementById("hour"); slider.value = hour;
 const hh = h => String(h).padStart(2,"0") + ":00";
-function paint(){ paths.forEach((p,i) => p.setAttribute("fill", color(D.tiles[i].r[hour])));
+function paint(){ paths.forEach((p,i) => p.classList.toggle("zone", !!D.tiles[i].z); p.setAttribute("fill", color(D.tiles[i].r[hour])));
   document.getElementById("title").textContent = `Risk at ${hh(hour)} on ${D.date}`;
   document.getElementById("sub").textContent = `${D.tiles.length.toLocaleString()} tiles (H3 res ${D.res}) within ${D.radius} miles of USC; crime history as of ${D.history_as_of}`;
   document.getElementById("hl").textContent = hh(hour);
@@ -146,6 +163,7 @@ function detail(i){ const t = D.tiles[i], r = t.r[hour];
     `<div class="row"><span class="big" style="color:${color(Math.max(r,.35))}">${r.toFixed(2)}</span><span class="muted">risk at ${hh(hour)}<br>riskier than ${Math.round(r*100)}% of cell-hours</span></div>
      <div>${(t.p[hour]*100).toFixed(2)}% chance of a reported incident this hour</div>
      <div>Nearest blue-light phone: ${t.bl==null?"?":t.bl.toLocaleString()+" m"}</div>
+     ${t.z ? '<div class="down"><b>USC campus / USC Village: set to 0 (zero risk for routing)</b></div>' : ''}
      <div style="margin-top:6px"><b>Why</b><ul>${reasons}</ul></div><div class="muted" style="margin-top:6px">${t.id}</div>`;
   document.getElementById("cid").textContent = t.id; drawCurve(t); }
 function drawCurve(t){ const c = document.getElementById("curve"); c.innerHTML = "";
