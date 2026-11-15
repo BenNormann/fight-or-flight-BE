@@ -3,8 +3,11 @@
 Backend for SafeRoute: crime-aware walking routes around USC. This folder
 (`algorithm/` on the `algorithm-init` branch) holds the **crime-risk model**.
 It is a gradient-boosted (XGBoost) classifier that scores every H3 cell
-(res 9, ~175 m) within **10 miles of USC** for every hour of the day. It also
+(res 9 hexagons, ~370 m across, ~0.12 km²) within **5 miles of USC** for every hour of the day. It also
 holds the `score_cell` / `explain_cell` functions the Flask API will call.
+
+**Step-by-step training, running and inference parameters:
+[MODEL_GUIDE.md](MODEL_GUIDE.md).**
 
 ## Setup
 
@@ -19,9 +22,9 @@ pip install -r algorithm/requirements.txt
 ## Train (run from the repo root, the folder that contains `algorithm/`)
 
 ```bash
-python -m algorithm.data.ingest_crime        # ~650k LAPD incidents, 2020-2024, 10 mi of USC -> algorithm/data/crime.db (~1-5 min)
-python -m algorithm.models.train_xgb         # builds features, trains, evaluates, saves model + plots (~2 min, ~1.5 GB RAM)
-python -m algorithm.scoring.score --build-cache --date 2026-11-14   # every cell x 24 h -> algorithm/scoring/cache/risk_cache.json (~20 s)
+python -m algorithm.data.ingest_crime        # ~400k LAPD incidents, 2020-2024, 5 mi of USC -> algorithm/data/crime.db (~1 min)
+python -m algorithm.models.train_xgb         # builds features, trains, evaluates, saves model + plots (~1-2 min, ~1.5 GB RAM)
+python -m algorithm.scoring.score --build-cache --date 2026-11-14   # every cell x 24 h -> algorithm/scoring/cache/risk_cache.json (~5 s)
 ```
 
 Options:
@@ -33,10 +36,23 @@ Options:
 ## Notebook
 
 `explore_train_infer.ipynb` (in this folder) is the testing ground before the
-model goes into the backend. It explores the data, trains and evaluates the
-model inline with SHAP and calibration plots, then runs inference with
-`score_cell` / `explain_cell` and draws the hourly heatmap. Open it from
-`algorithm/` and use Restart & Run All (~3-4 min).
+model goes into the backend. Open it from `algorithm/` and use Restart & Run
+All (~2 min). Its sections are:
+
+1. **Data:** volume over time (with the NIBRS drop), hour × weekday harm, hex maps with the blue-light phones.
+2. **Per-crime weights:** the severity mix, recency decay curves, the time-of-day kernel, the blue-light factor.
+3. **Features:** every feature with its definition and target correlation, the feature correlation matrix, and "does more history mean more risk?" curves.
+4. **Train:** XGBoost (monotone constraints) and sklearn GBC.
+5. **Evaluate:** grid-weighted 2023 metrics, ROC / PR / calibration, heatmap-level check.
+6. **Explain:** SHAP importance and learned direction.
+7. **Inference:** `score_cell` for landmarks, `explain_cell`, a blue-light what-if, hourly heatmaps.
+8. **Sanity checks** on the saved model, each printing PASS or FLAG: dangerous vs quiet places, most-harm vs quietest cells, predicted vs actual per cell, monotonicity, blue-light, time of day.
+9. **Model evaluation summary:** the final metrics table and decile calibration.
+
+`risk_map_interactive.ipynb` is a separate hover map: move the mouse over a tile
+to see its final risk, probability, top reasons and nearest blue-light phone,
+with an hour slider and the tile's 24-hour curve. It needs `ipympl`
+(`pip install seaborn ipympl ipywidgets`, then restart Jupyter).
 
 ## Project structure
 
@@ -44,12 +60,13 @@ model inline with SHAP and calibration plots, then runs inference with
 fight-or-flight-BE/
 └── algorithm/                      the risk-model package (import as `algorithm.*`)
     ├── common/                     shared building blocks, no I/O of their own
-    │   ├── config.py               every knob: area, H3 res, dates/splits, sampling, paths
-    │   ├── geo.py                  H3 cell universe, darkness (astral), blue-light phones, distances
-    │   └── severity.py             crime description -> violent / property / other
+    │   ├── config.py               every knob: area, H3 res, dates, half-lives, blue-light, paths
+    │   ├── geo.py                  H3 cell universe, darkness (astral), blue-light phones + protection
+    │   └── severity.py             LAPD crime code -> 0-10 harm score (per-crime weight)
     ├── data/
     │   ├── ingest_crime.py         LAPD Socrata API -> crime.db           [offline step 1]
-    │   └── crime.db                SQLite incidents table (git-ignored, ~130 MB)
+    │   ├── bluelight_from_concept3d.py  USC map export -> bluelight_phones.csv
+    │   └── crime.db                SQLite incidents table (git-ignored, ~75 MB)
     ├── features/
     │   └── build_dataset.py        History class: crime.db -> feature rows [offline step 2]
     ├── models/
@@ -60,6 +77,8 @@ fight-or-flight-BE/
     │   └── cache/risk_cache.json   every modelled cell x 24 h, precomputed
     ├── notebooks/                  model_report.md + SHAP / calibration plots
     ├── explore_train_infer.ipynb   interactive explore -> train -> evaluate -> infer
+    ├── risk_map_interactive.ipynb  hover map of the final risk scores (seaborn + ipympl)
+    ├── MODEL_GUIDE.md          how to train, run, and call the model (inference parameters)
     └── requirements.txt
 ```
 
@@ -67,17 +86,17 @@ fight-or-flight-BE/
 
 ```
   LAPD open data (Socrata 2nrs-mtv8)
-          │  data/ingest_crime.py            filter to 10-mile circle, tag H3 cell + severity tier
+          │  data/ingest_crime.py            filter to 5-mile circle, tag H3 cell
           ▼
   data/crime.db  (incidents table)
-          │  features/build_dataset.py       History: prefix sums per cell/day/hour, neighbour rings
+          │  features/build_dataset.py       History: per-crime weights (severity x recency x time of day)
           ▼
-  feature rows  (cell × date × hour, 21 features, target = ≥1 incident)
+  feature rows  (cell × date × hour, 18 features, target = ≥1 incident)
           │  models/train_xgb.py             time split, XGBoost + early stopping, prior correction
           ▼
   models/artifacts/xgb_risk.ubj + model_meta.json   (features, neg_rate, risk quantiles, area)
           │  scoring/score.py                loads model + History once, builds features for any
-          │                                  (cell, hour, date), predicts, explains with SHAP
+          │                                  (cell, hour, date), predicts, applies blue-light factor, SHAP
           ├──────────────► score_cell / explain_cell   (live, per request)
           ▼
   scoring/cache/risk_cache.json  (all cells × 24 h for one date, with top factors)
@@ -91,23 +110,24 @@ resolution, or the train/test years in one place changes the whole pipeline.
 - `geo.py` decides which cells exist: `area_cells()` returns every res-9 cell
   inside the circle. It also answers "is it dark at this hour on this date?"
   and "how far is the nearest blue-light phone?".
-- `severity.py` turns LAPD's free-text crime descriptions into the three tiers
-  the features use.
+- `severity.py` gives every crime a 0-10 harm score from its LAPD crime code
+  (homicide 10 ... fraud 0.25, weapon x1.5). The features weight each crime by
+  this score, its recency and how close its hour is to the row's hour.
 
 **`data/`: raw data in, one table out.** `ingest_crime.py` is the only code
 that touches the network. It pages through the LAPD API over the circle's
 bounding box and keeps rows inside the circle. It drops redacted (0,0)
-locations, adds the H3 cell and severity tier, and does a full refresh of
+locations, adds the H3 cell and a display tier, and does a full refresh of
 `crime.db`. Everything downstream reads only `crime.db`, so the pipeline runs
 offline after this step.
 
 **`features/`: the leakage-safe feature engine.** `History` loads `crime.db`
-once and precomputes prefix sums: daily counts per cell (plain, severity-weighted
-and violent), hour-of-day counts per cell per month, and ring-1 / ring-2
-neighbour counts via sparse H3 adjacency. A window like "incidents in this cell
-in the last 30 days" is then two array lookups. Every window ends *before* the
-row's date, so no future data leaks in; this is verified by deleting future
-incidents and checking the features don't change. The same `History.features()`
+once. It computes **per-crime weighted history**: each past crime counts
+`severity x 0.5**(age / half-life) x exp(-hour_gap**2 / (2 x 2h**2))`, summed per
+cell (half-lives 7, 30 and 365 days) and over ring-1 / ring-2 neighbours via
+sparse H3 adjacency. One forward pass over the calendar keeps these decayed
+sums up to date. Plain prefix sums give long-run and same-hour counts.
+Everything ends *before* the row's date, so no future data leaks in. The same `History.features()`
 call is used for training rows, evaluation rows and live API requests, so
 training and serving can't drift apart. History also decides which cells are
 **modelled** (at least `MIN_CELL_INCIDENTS` in the training years) and which
@@ -128,7 +148,8 @@ things the rest of the package depends on:
 **`scoring/`: the only part the backend imports.** `score.py` lazily loads the
 model, the metadata and a `History` (once per process). For any (cell, hour,
 date) it builds features with the same code as training, applies the prior
-correction and maps the probability to a percentile. `explain_cell` adds the
+correction, multiplies by the blue-light factor (up to 25% lower next to a
+phone) and maps the probability to a percentile. `explain_cell` adds the
 SHAP factors, and `build_cache` does all cells × 24 hours in one vectorised call.
 For dates after 2023, history windows are anchored at the end of 2023 (see
 the note below). Cells in the circle without LAPD data return `None`.
@@ -165,10 +186,10 @@ cell_status("8929a56eb77ffff")                                   # "ok" | "no_da
 
 - `risk` (what `score_cell` returns) is 0..1 and **relative**: the percentile of
   this cell-hour's predicted probability among all modelled cell-hours in 2023.
-  Use it for heatmap colour and routing cost. Busy areas (downtown, Hollywood,
-  Koreatown) sit near 1.0 all day; to compare blocks inside them, use `prob`.
+  Use it for heatmap colour and routing cost. Busy areas (downtown, MacArthur
+  Park, Koreatown) sit near 1.0 all day; to compare blocks inside them, use `prob`.
 - `prob` is the calibrated probability that at least one incident is reported
-  in that cell during that hour (typically 0.03%-3%).
+  in that cell during that hour (typically 0.05%-3%), after the blue-light factor.
 - `risk_cache.json` holds per cell `lat`, `lon`, and 24-length `risk`, `prob`
   and `top_factors` lists, indexed by hour. Each factor is
   `[feature_index, shap_effect]`, and the index points into the cache's
@@ -194,12 +215,12 @@ lat/lng into cells). Everything else in `algorithm/` is either imported by
 | `data/ingest_crime.py` | **No, offline** | refresh data (manual / weekly) |
 | `models/train_xgb.py` | **No, offline** | retrain, then restart the API |
 | `features/build_dataset.py` CLI | **No, offline** | dump the training frame for inspection |
-| `score.py --build-cache` | **No, cron** | regenerate the cache daily (~20 s), e.g. just after midnight |
+| `score.py --build-cache` | **No, cron** | regenerate the cache daily (~5 s), e.g. just after midnight |
 | notebook, `notebooks/` | No | testing ground and reports |
 
 **Warm-up and cost (measured here):** the first call loads the model plus
-`History`, which takes about 4 s and about 600 MB of RAM. After that,
-`explain_cell` takes about 6 ms per cell-hour. Call `score._load()` once at
+`History`, which takes about 3 s and about 470 MB of RAM. After that,
+`explain_cell` takes about 4 ms per cell-hour. Call `score._load()` once at
 app start so the first user doesn't wait. Each gunicorn worker loads its own
 copy, so use 1-2 workers with threads rather than many processes.
 
@@ -208,8 +229,8 @@ copy, so use 1-2 workers with threads rather than many processes.
 | Endpoint | Uses | Returns |
 |---|---|---|
 | `GET /health` | `model_meta.json`, `metrics.json`, cache header | model trained_at, area, 2023 AUC, cache date, modelled / no-data cell counts |
-| `GET /hotzones?hour=23[&date=YYYY-MM-DD]` | `risk_cache.json` (rebuild with `build_cache(date)` if the date differs and it's worth 20 s) | for that hour: `[{cell, risk, prob, factors}]` for modelled cells + `no_data_cells`. The frontend draws them with deck.gl's `H3HexagonLayer`; no GeoJSON needed |
-| `GET /score?lat=..&lng=..&hour=..[&date=]` | `h3.latlng_to_cell` → `explain_cell` | `{cell, risk, prob, status, history_as_of, factors:[{label, value, effect}]}`; `status` is `ok`, `no_data` or `outside` (return 400 for `outside`) |
+| `GET /hotzones?hour=23[&date=YYYY-MM-DD]` | `risk_cache.json` (rebuild with `build_cache(date)` if the date differs, ~5 s) | for that hour: `[{cell, risk, prob, factors}]` for modelled cells + `no_data_cells`. The frontend draws them with deck.gl's `H3HexagonLayer`; no GeoJSON needed |
+| `GET /score?lat=..&lng=..&hour=..[&date=]` | `h3.latlng_to_cell` → `explain_cell` | `{cell, risk, prob, status, harm_score, bluelight, history_as_of, factors:[{label, value, effect}]}`; `status` is `ok`, `no_data` or `outside` (return 400 for `outside`) |
 | `GET /route?from=lat,lng&to=lat,lng&hour=..` | routing module (not in `algorithm/` yet) + risk lookup from the cache | `fastest` and `safest` routes with minutes, mean risk, top factors along the way, and how many no-data cells they cross |
 
 `/route` works like this. Each street edge in the OSM walking graph gets a
@@ -264,25 +285,38 @@ def score_point():
 - **Source:** LA City Open Data, "Crime Data from 2020 to Present" (LAPD),
   Socrata dataset `2nrs-mtv8`, https://data.lacity.org/resource/2nrs-mtv8.json.
   Fields kept: `dr_no, date_occ, time_occ, lat, lon, crm_cd, crm_cd_desc, weapon_used_cd, part_1_2`.
-- **Area:** a 10-mile circle around Tommy Trojan (`CENTER`, `RADIUS_MILES` in
-  `common/config.py`). That is 6,898 H3 cells, of which **3,432 are modelled**.
-- **No-data cells:** the other 3,466 cells in the circle are policed by other
-  departments: Inglewood, Culver City, Beverly Hills, Vernon, Huntington Park,
-  and LA County Sheriff areas. LAPD doesn't record them, so they are `no_data`,
+- **Area:** a 5-mile circle around Tommy Trojan (`CENTER`, `RADIUS_MILES` in
+  `common/config.py`). That is 1,724 H3 cells, of which **1,451 are modelled**.
+- **No-data cells:** the other 273 cells in the circle are mostly policed by
+  other departments: Vernon, Huntington Park, the north edge of Inglewood, and
+  LA County Sheriff islands. LAPD doesn't record them, so they are `no_data`,
   not safe. LASD publishes incident data, but its historical files stop at
-  2021, and Culver City / Inglewood / Beverly Hills publish no incident-level
+  2021, and Vernon / Huntington Park / Inglewood publish no incident-level
   data. So these areas are not included yet.
 - **Years:** see the note above. For dates after 2023, history features are
   anchored at the end of 2023 (`LIVE_HISTORY_END`); calendar and darkness
   features use the real date.
 - **Redacted locations** (lat/lon 0,0) are dropped. LAPD uses `time_occ = 1200`
   when the time is unknown, so noon is slightly over-represented (about 3%).
-- **Severity tiers** (`common/severity.py`): keyword lookup into violent
-  (robbery, assault, battery, homicide, sex crimes, ...), property, other.
+- **Severity** (`common/severity.py`): a 0-10 harm score per LAPD crime code,
+  modelled on crime-harm indices (Cambridge CHI): homicide 10, rape 8,
+  kidnapping 7, shootings / aggravated assault 6, robbery 5, sexual battery /
+  brandishing 4, simple assault / theft from a person 3, burglary 2, vehicle
+  crime and plain theft 1, fraud 0.25. Firearms, knives and blunt weapons
+  (`weapon_used_cd` 100-399) raise a crime by 50%, capped at 6. The stored
+  `tier` (violent = severity ≥ 3, property, other) is only for charts.
 - **Darkness:** civil dawn/dusk for LA from `astral`.
-- **Blue-light phones:** TODO. `common/geo.py` uses approximate campus-landmark
-  points as **placeholders**. Put the real USC DPS phone coordinates in
-  `data/bluelight_phones.csv` (`lat,lon,name`), then retrain.
+- **Blue-light phones:** 83 USC emergency phones (University Park and Health
+  Sciences campuses) in `data/bluelight_phones.csv`, taken from the USC campus
+  map's "Emergency Phones" layer (category 55276). To refresh, export that
+  layer's JSON from the map in a browser (see the docstring in
+  `data/bluelight_from_concept3d.py`), then run
+  `python -m algorithm.data.bluelight_from_concept3d data/categories-3.json`
+  and retrain. Phones always **lower** risk: `dist_bluelight_m` is
+  monotone-constrained in the model, and scoring multiplies the probability by
+  `1 - 0.25 x exp(-distance / 150 m)` (`config.BLUELIGHT_*`). The cut is a policy
+  choice, not learned, because phones sit where people already walk.
+  `geo.bluelight_protection()` exposes the same 0-1 value for routing.
 - **Streetlights:** TODO, not loaded yet (LA Bureau of Street Lighting data).
 
 ## Model
@@ -292,13 +326,23 @@ incident. All history features use **only data from before the row's date**:
 
 | Group | Features |
 |---|---|
-| Time | hour, weekday, month, season, is_weekend, is_dark |
+| Time | hour, weekday, month, is_weekend, is_dark |
 | Place | cell centroid lat/lon, distance to nearest blue-light phone |
-| Cell history | counts over the last 7/30/90 days, severity-weighted 90d, violent 90d, same-hour ±1 over the past 12 months, long-run rate, long-run same-hour rate |
-| Neighbours | H3 ring-1 30d and 90d counts, ring-2 30d count |
+| Per-crime weighted history | `harm_7d`, `harm_30d` (Σ severity × recency, half-life 7 / 30 days); `harm_30d_tod`, `harm_365d_tod` (also × time-of-day match, σ = 2 h) |
+| Neighbours | `nb1_harm_30d`, `nb2_harm_30d`: `harm_30d` over H3 rings 1 and 2 |
+| Long-run counts | same-hour ±1 over the past 12 months, long-run rate, long-run same-hour rate |
 | Area | all incidents in the modelled area in the last 7 days |
 
-The full grid is about 30M cell-hours a year, so nothing materialises it.
+Each past crime's weight is
+
+    severity x 0.5 ** (age_days / half_life) x exp(-hour_gap**2 / (2 x sigma**2))
+
+so a robbery last week at 10 pm counts far more for a 10 pm row than a car
+theft last year at noon. With a 30-day half-life, a crime 3 months old counts
+1/8. Compared with the old violent/property counts on the same 5-mile data,
+AUC is the same (0.746 vs 0.747) with fewer, more explainable features.
+
+The full grid is about 12.7M cell-hours a year, so nothing materialises it.
 Training keeps every positive plus 5 sampled negatives each, then undoes the
 sampling with a prior correction, so outputs are real probabilities.
 Evaluation keeps every positive plus 10 negatives each, weighted by 1/sample
@@ -306,17 +350,26 @@ rate. Split by time, never at random: train 2020-04 to 2022-06, early-stop on
 2022-07 to 2022-12, test on 2023. XGBoost (`hist`, depth 4, lr 0.03, early
 stopping) is compared with sklearn's `GradientBoostingClassifier`.
 
-## Results (2023, full-grid estimate: 30.1M cell-hours, base rate 0.47%)
+The history features and `dist_bluelight_m` (`MONOTONE_INCREASING` in
+`config.py`) carry XGBoost **monotone constraints**: more crime history can
+only raise the score, and being farther from a blue-light phone can never
+lower it. Without them, correlated features split credit and a feature can
+end up pointing the wrong way. The notebook's monotonicity check tests this.
+
+## Results (2023, full-grid estimate: 12.7M cell-hours, base rate 0.69%)
 
 | Model | ROC-AUC | PR-AUC | Top-10% capture |
 |---|---|---|---|
-| **XGBoost** | **0.786** | **0.0273** | **41.5%** |
-| sklearn GradientBoosting | 0.783 | 0.0235 | 40.9% |
-| Past-year same-hour count (baseline) | 0.772 | 0.0261 | 40.4% |
+| **XGBoost** | **0.746** | **0.0298** | **36.7%** |
+| sklearn GradientBoosting | 0.741 | 0.0258 | 35.4% |
+| Past-year same-hour count (baseline) | 0.734 | 0.0291 | 36.0% |
 
-On the 2024 out-of-time check, XGBoost gets AUC 0.803. Heatmap-level rank
+On the 2024 out-of-time check, XGBoost gets AUC 0.766. Heatmap-level rank
 correlation with what actually happened in 2023 is 0.72, and calibration is
-close to perfect. Details, SHAP and calibration plots:
+within 0.17 points in every decile. All six score sanity checks in the
+notebook pass. AUC is lower than the earlier 10-mile model (0.785) because a
+smaller area has fewer very different places to tell apart, not because the
+model got worse. Details, SHAP and calibration plots:
 [notebooks/model_report.md](notebooks/model_report.md).
 
 **Where this goes next:** spatio-temporal deep models such as ST-SHN and
