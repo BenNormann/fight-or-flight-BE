@@ -11,10 +11,9 @@ from astral.sun import sun
 
 from . import config
 
-# TODO(data): replace with the real USC DPS Emergency Blue Light Phone
-# coordinates (dps.usc.edu). These are APPROXIMATE campus landmark points used
-# as stand-ins so the distance feature exists end to end. Drop a CSV at
-# data/bluelight_phones.csv with header `lat,lon,name` and it wins.
+# The real phones (83, from the USC campus map) live in data/bluelight_phones.csv
+# (`lat,lon,name`); regenerate it with data/bluelight_from_concept3d.py.
+# These APPROXIMATE landmark points are only a fallback if that CSV is missing.
 PLACEHOLDER_PHONES = [
     (34.0202, -118.2837, "Doheny Library (approx)"),
     (34.0219, -118.2829, "Leavey Library (approx)"),
@@ -49,6 +48,22 @@ def haversine_m(lat1, lon1, lat2, lon2) -> float:
 
 def dist_to_bluelight_m(lat: float, lon: float) -> float:
     return min(haversine_m(lat, lon, a, b) for a, b, _ in bluelight_phones())
+
+
+def bluelight_protection(dist_m) -> float:
+    """0..1 protection from the nearest blue-light phone (1 = standing at one).
+
+    Scoring multiplies risk probability by 1 - BLUELIGHT_MAX_REDUCTION * this;
+    a route planner can use it directly as a bonus for edges near phones."""
+    return math.exp(-max(float(dist_m), 0.0) / config.BLUELIGHT_RANGE_M)
+
+
+def bluelight_factor(dist_m):
+    """Multiplier applied to the model's probability: 1 - MAX_REDUCTION x
+    protection. 0.75 at a phone, ~0.87 at 100 m, ~1.0 beyond 600 m. Vectorised."""
+    import numpy as np
+    d = np.maximum(np.asarray(dist_m, dtype=float), 0.0)
+    return 1.0 - config.BLUELIGHT_MAX_REDUCTION * np.exp(-d / config.BLUELIGHT_RANGE_M)
 
 
 def in_radius(lat: float, lon: float) -> bool:

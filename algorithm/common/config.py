@@ -14,13 +14,13 @@ CACHE_PATH = ROOT / "scoring" / "cache" / "risk_cache.json"
 REPORT_DIR = ROOT / "notebooks"
 
 # Area of interest: a circle of RADIUS_MILES around USC (Tommy Trojan).
-# 10 miles reaches roughly Hollywood/Griffith Park to the north, Santa Monica
-# Blvd/Century City to the west, LAX/Inglewood to the south-west and
-# East LA/Huntington Park to the east. Parts of it (Inglewood, Culver City,
-# Beverly Hills, Vernon, county areas) are NOT policed by LAPD, so they have
-# no data in this dataset; see MIN_CELL_INCIDENTS below.
+# 5 miles reaches roughly Koreatown/Mid-City to the north-west, Downtown,
+# Boyle Heights and Vernon to the east, and Hyde Park/Florence to the south.
+# A few slices of it (Vernon, Huntington Park, county islands, Inglewood's
+# north edge) are NOT policed by LAPD, so they have no data in this dataset;
+# see MIN_CELL_INCIDENTS below.
 CENTER = (34.0224, -118.2851)  # Tommy Trojan
-RADIUS_MILES = 10.0
+RADIUS_MILES = 5.0
 RADIUS_M = RADIUS_MILES * 1609.344
 _dlat = RADIUS_M / 111_320.0
 _dlon = RADIUS_M / (111_320.0 * math.cos(math.radians(CENTER[0])))
@@ -30,7 +30,7 @@ BBOX = (CENTER[0] - _dlat, CENTER[1] - _dlon, CENTER[0] + _dlat, CENTER[1] + _dl
 TIMEZONE = "America/Los_Angeles"
 LAT, LON = CENTER  # for sunrise / twilight
 
-H3_RES = 9  # ~175 m edge, ~0.1 km^2 per cell
+H3_RES = 9  # hexagons ~210 m per side, ~370 m across, ~0.12 km^2 each (near USC)
 
 # LAPD "Crime Data from 2020 to Present" (2nrs-mtv8) ends in Dec 2024, and
 # 2024 drops to ~half volume after March (LAPD's NIBRS switch). We ingest
@@ -61,4 +61,41 @@ SEED = 42
 # no records means no data, not "safe"; they are reported as no_data.
 MIN_CELL_INCIDENTS = 5
 
-SEVERITY_WEIGHT = {"violent": 1.0, "property": 0.4, "other": 0.2}
+# ---- Per-incident weights (see common/severity.py for the full formula) -----
+# Each past crime counts severity x recency x time-of-day match:
+#   recency   = 0.5 ** (age_days / half_life): a crime HALF_LIFE days ago counts
+#               half as much as one yesterday. Three horizons let the model mix
+#               "what happened lately" with "what this place is always like":
+#                 7 days   -> a crime 3 weeks ago counts 1/8
+#                 30 days  -> the main "recent" signal; 90 days ago counts 1/8
+#                 365 days -> a slow, chronic-hotspot memory
+#   time of day = exp(-dh**2 / (2 * TOD_SIGMA_HOURS**2)), dh = circular hour gap.
+#               With sigma = 2 h a crime 2 h away counts 0.61, 4 h away 0.14,
+#               6 h away 0.01, so a 10 pm row mostly sees evening crimes.
+HALF_LIFE_DAYS = {"7d": 7, "30d": 30, "365d": 365}
+TOD_SIGMA_HOURS = 2.0
+
+# ---- Blue-light phones: an explicit, protective effect -------------------
+# Two layers so a phone can only ever LOWER risk:
+#  1. The model sees dist_bluelight_m with a +1 monotone constraint: farther
+#     from a phone can never mean safer.
+#  2. Scoring then multiplies the model's probability by
+#        1 - BLUELIGHT_MAX_REDUCTION * exp(-dist_m / BLUELIGHT_RANGE_M)
+#     i.e. up to 25% lower right at a phone, ~13% at 100 m, ~5% at 250 m,
+#     ~0 beyond 600 m. This is a policy choice, not learned: phones are
+#     placed where people already walk, so the raw data can't show their
+#     deterrent effect. geo.bluelight_protection() returns the same 0..1
+#     protection for the route planner.
+BLUELIGHT_MAX_REDUCTION = 0.25
+BLUELIGHT_RANGE_M = 150.0
+
+# Features the model is forced to treat as "more history => more risk"
+# (XGBoost monotone_constraints = +1), plus dist_bluelight_m (farther from a
+# phone => never safer). A safety app must never say "more violent crime here,
+# so lower risk", which unconstrained trees can do with correlated features.
+MONOTONE_INCREASING = [
+    "harm_7d", "harm_30d", "harm_30d_tod", "harm_365d_tod",
+    "nb1_harm_30d", "nb2_harm_30d",
+    "cell_hourband_365d", "cell_rate_all", "cell_hourband_rate_all",
+    "dist_bluelight_m",
+]
