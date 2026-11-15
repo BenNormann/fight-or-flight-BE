@@ -1,7 +1,7 @@
 """Build the walkable street network from a local OSM extract and load it into PostGIS
 as road_nodes / road_edges.
 
-    docker compose run --rm tools bash scripts/fetch_osm.sh        # once: makes data/raw/usc_10mi_roads.osm.pbf
+    docker compose run --rm tools bash scripts/fetch_osm.sh        # once: makes data/raw/usc_roads.osm.pbf
     docker compose run --rm tools python -m scripts.load_roads [path.osm.pbf]
 
 Uses a local file (not the public Overpass API, which is often overloaded).
@@ -87,7 +87,8 @@ def main():
         os.makedirs(work, exist_ok=True)
 
         pbf = args.path or find_input(cfg["DATA_DIR"])
-        ring = circle_ring(cfg["USC_LAT"], cfg["USC_LNG"], cfg["RADIUS_KM"])
+        # study circle + margin, so routes that start near the edge still have streets
+        ring = circle_ring(cfg["USC_LAT"], cfg["USC_LNG"], cfg["RADIUS_KM"] + cfg["ROAD_MARGIN_KM"])
         circle = Polygon([(lng, lat) for lat, lng in ring])
         t = time.time()
         print(f"building walk network from {pbf} ...")

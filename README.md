@@ -1,6 +1,6 @@
 # fight-or-flight-BE
 
-Backend for the USC safe-route project. It collects **space-time data** (light, weather, crime) for a 10-mile circle around USC, stores it in **PostgreSQL + PostGIS + TimescaleDB**, and serves it to:
+Backend for the USC safe-route project. It collects **space-time data** (light, weather, crime) for a 5-mile circle around USC (the same area as the risk model), stores it in **PostgreSQL + PostGIS + TimescaleDB**, and serves it to:
 
 - the **crime-risk model** in `risk-model/` and the **safe-route planner** in `pathfinding/` (by Desh), which the API runs in-process on backend data, and
 - the **frontend**, which gets 3D buildings as PMTiles, a risk heatmap, and JSON data layers.
@@ -25,7 +25,7 @@ STATIC (one-time scripts, run by you)            PostgreSQL 16 + PostGIS + Times
 ./scripts/fetch_data.sh           # large data files from the GitHub Release (see "Data files")
 cp .env.example .env              # optional; every value has a default
 docker compose up -d --build      # db + api (runs migrations) + ingestor
-docker compose exec api python -m scripts.seed_h3_cells    # 6,909 res-9 cells, 30 res-6 area cells
+docker compose exec api python -m scripts.seed_h3_cells    # 1,727 res-9 cells, 11 res-6 area cells
 open http://localhost:5000/api/docs                        # Swagger UI
 ```
 
@@ -39,7 +39,7 @@ That gives you the **live data**. On first start the crime ingestors backfill fr
 docker compose run --rm tools bash scripts/build_buildings.sh   # ~3 min: buildings -> PostGIS (+ rebuilds PMTiles)
 docker compose run --rm tools python -m scripts.load_roads      # ~3 min: OSM walk network -> PostGIS
 docker compose exec api python -m scripts.load_pois              # seconds: data/pois/*.geojson -> PostGIS
-# (only if data/raw/usc_10mi_roads.osm.pbf is missing: bash scripts/fetch_osm.sh first)
+# (only if data/raw/usc_roads.osm.pbf is missing: bash scripts/fetch_osm.sh first)
 ```
 
 ## Spatial model: H3
@@ -48,8 +48,8 @@ Every data point is keyed by an [H3](https://h3geo.org) hexagon, stored as a hex
 
 | Resolution | Cell size | Used for |
 |---|---|---|
-| **9** (fine) | ~0.12 km², 6,909 cells | crime, streetlights, buildings, features |
-| **6** (area) | ~36 km², 30 cells | sun position and weather (area-wide signals) |
+| **9** (fine) | ~0.12 km², 1,727 cells | crime, streetlights, buildings, features |
+| **6** (area) | ~36 km², 11 cells | sun position and weather (area-wide signals) |
 
 `h3_cells.parent_r6` links the two levels. The `ml_features` view broadcasts area signals down to their res-9 children.
 
@@ -194,7 +194,7 @@ Two packages by Desh live next to the backend, and the API runs both in-process:
 `/risk/score` builds a context dict for the cell from the backend database: weather, darkness, lit-road share, streetlights, buildings, roads, POIs, and live crime counts including NIBRS 2025+. Every key whose name matches a model feature is passed to the model as an input. The response lists them under `model_inputs_from_backend`; everything else comes back under `context`.
 
 **Safe routes (`GET /api/v1/route?from=lat,lng&to=lat,lng&hour=`):** the planner in `pathfinding/` runs on backend data instead of its standalone inputs:
-- **Graph:** `road_edges` from PostGIS (the OSM walk network from `data/raw/usc_10mi_roads.osm.pbf`) is split into straight segments, which is the shape `pathfinding.graph.WalkGraph` expects. It covers the model circle plus 1.5 km. There's no Overpass download.
+- **Graph:** `road_edges` from PostGIS (the OSM walk network from `data/raw/usc_roads.osm.pbf`) is split into straight segments, which is the shape `pathfinding.graph.WalkGraph` expects. It covers the model circle plus 1.5 km. There's no Overpass download.
 - **Risk:** the model's heatmap for the requested date (`/risk/hotzones`, memoised per date), not a fixed cache file.
 - **Response:** `safe` and `shortest` routes, each with length, detour %, mean/max risk, metres in high-risk cells, % without data, blue-light phones passed, `coords` (`[[lat, lng], ...]`) and a GeoJSON `geometry`.
 - **Knobs:** `max_detour` (default 0.2, i.e. the safe route is at most 20% longer) and `phone_weight` (0.05).
@@ -208,13 +208,13 @@ Known limits:
 
 ## Data files
 
-GitHub rejects files over 100 MB, so the two large files live in a **GitHub Release** (tag `data-v1`). Release assets can be up to 2 GB each and don't use Git LFS quota. Everything else is in git.
+GitHub rejects files over 100 MB, so the two large files live in a **GitHub Release** (tag `data-v2`; `data-v1` has the earlier 10-mile tiles). Release assets can be up to 2 GB each and don't use Git LFS quota. Everything else is in git.
 
 | File | Size | Where | Purpose |
 |---|---|---|---|
 | `data/raw/LARIAC6_Buildings_2020.gdb.zip` | 412 MB | Release | building source for `build_buildings.sh` |
-| `data/tiles/buildings.pmtiles` | 97 MB | Release | prebuilt 3D tiles; serve as-is or rebuild |
-| `data/raw/usc_10mi_roads.osm.pbf` | 12 MB | git | OSM roads clipped to the circle |
+| `data/tiles/buildings.pmtiles` | 30 MB | Release | prebuilt 3D tiles; serve as-is or rebuild |
+| `data/raw/usc_roads.osm.pbf` | 4.6 MB | git | OSM roads clipped to the circle + 1.5 km |
 | `data/checksums.sha256` | — | git | SHA-256 of the Release files |
 | `data/work/` | ~1 GB | ignored | downloads + intermediates; safe to delete |
 | `risk-model/data/crime.db` | ~120 MB | ignored | model crime history, generated by `scripts/export_crime_db.py` |
@@ -222,6 +222,19 @@ GitHub rejects files over 100 MB, so the two large files live in a **GitHub Rele
 `./scripts/fetch_data.sh` downloads the Release files into place and verifies their checksums. It resumes partial downloads and skips files already present. Pass `--no-tiles` to skip the tiles and build them yourself.
 
 To update the data, regenerate the files, then run `./scripts/publish_data_release.sh` (needs `gh auth login`; use `DATA_RELEASE_TAG=data-v2` for a new version). It uploads the files and rewrites `data/checksums.sha256`, which you then commit.
+
+### Changing the study radius
+
+The radius (`RADIUS_KM`, default 8.047 km = 5 miles) must match `RADIUS_MILES` in `risk-model/common/config.py`; a test checks this. After changing it:
+
+```bash
+docker compose exec api python -m scripts.seed_h3_cells                   # grid: adds/removes cells
+docker compose exec api python -m scripts.prune_study_area --yes          # drop rows outside (dry run without --yes)
+docker compose run --rm tools bash scripts/fetch_osm.sh                   # roads file for the new circle
+docker compose run --rm tools python -m scripts.load_roads
+docker compose run --rm tools bash scripts/build_buildings.sh             # buildings + tiles (then publish a new data Release)
+docker compose exec api python -m scripts.export_crime_db && docker compose restart api
+```
 
 ## Static map layers
 
@@ -242,21 +255,21 @@ The source file is `data/raw/LARIAC6_Buildings_2020.gdb.zip` (412 MB, from the d
 `build_buildings.sh` does the following:
 1. Opens the zipped geodatabase in place (no unzip), using layer `LARIAC6_BUILDINGS_2020` (skips the `*_DELETED_*` layer).
 2. Keeps `CODE = Building`, dropping `Courtyard` and `Free Standing Solar Structure`. Override with `--codes`.
-3. Clips to the 16.09 km circle using each footprint's interior point. That leaves **969,395 buildings**.
+3. Clips to the 8.047 km (5-mile) circle using each footprint's interior point. That leaves **289,038 buildings**.
 4. Converts `HEIGHT`/`ELEV` from feet to metres. 97.6% have a height; the max is 310 m (US Bank Tower).
 5. Loads PostGIS and tags each building with its res-9 cell, filling `h3_cells.building_count` / `avg_height_m`.
-6. Runs tippecanoe to write `data/tiles/buildings.pmtiles` (~100 MB, zoom 10–16, layer `buildings`, property `height_m`). Footprints with no height get 4 m in the tiles only, so they still extrude.
+6. Runs tippecanoe to write `data/tiles/buildings.pmtiles` (~30 MB, zoom 10–16, layer `buildings`, property `height_m`). Footprints with no height get 4 m in the tiles only, so they still extrude.
 
-**Map data stays in the backend.** Shipping ~1M footprints to the browser as GeoJSON would mean ~450 MB. The frontend loads only the visible tiles from `GET /api/v1/buildings.pmtiles`, which supports range requests. Render with MapLibre GL plus the [pmtiles](https://github.com/protomaps/PMTiles) protocol: a `fill-extrusion` layer on source-layer `buildings`, with `fill-extrusion-height: ["get", "height_m"]`.
+**Map data stays in the backend.** Shipping ~290k footprints to the browser as GeoJSON would mean ~140 MB. The frontend loads only the visible tiles from `GET /api/v1/buildings.pmtiles`, which supports range requests. Render with MapLibre GL plus the [pmtiles](https://github.com/protomaps/PMTiles) protocol: a `fill-extrusion` layer on source-layer `buildings`, with `fill-extrusion-height: ["get", "height_m"]`.
 
 ### Roads
 
 The County file contains no roads, so roads come from **OpenStreetMap**: streets plus sidewalks, footpaths and campus paths. That suits pedestrian routing better than the County street centerlines. The road graph is built from a local file, not the public Overpass API, which proved too unreliable (502s and hung requests).
 
 1. `scripts/fetch_osm.sh` (one-time; the output is committed):
-   - Downloads Geofabrik's Southern California extract (~640 MB, resumable, kept in `data/work/` and ignored by git).
+   - Downloads Geofabrik's Southern California extract (~640 MB, kept in `data/work/` and ignored by git).
    - Clips it to the circle with `osmium extract` and keeps only `highway=*` ways.
-   - Writes `data/raw/usc_10mi_roads.osm.pbf` (12 MB, committed to git). Re-run it whenever you want fresher OSM data.
+   - Writes `data/raw/usc_roads.osm.pbf` (4.6 MB, committed to git), clipped to the circle plus `ROAD_MARGIN_KM` (1.5 km) so routes near the edge have streets. A download younger than 7 days is reused. Re-run it whenever you want fresher OSM data.
 2. `scripts/load_roads.py` builds the network and loads it:
    - Uses OSMnx with an OSMnx-style "walk" filter that drops motorways, private access, `foot=no`, construction and so on.
    - Keeps the largest connected component, simplifies the graph, and makes it undirected.

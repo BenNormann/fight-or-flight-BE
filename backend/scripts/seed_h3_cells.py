@@ -1,4 +1,5 @@
-"""Populate h3_cells with every res-9 cell in the 10-mile study circle.
+"""Populate h3_cells with every res-9 cell in the study circle (RADIUS_KM) and remove
+cells that are no longer inside it (e.g. after shrinking the radius).
 
     docker compose exec api python -m scripts.seed_h3_cells
 """
@@ -26,7 +27,11 @@ def main():
         rows = [{"cell": c, "res": res, "parent": h3.cell_to_parent(c, area_res),
                  "geom": cell_polygon_wkt(c), "centroid": cell_centroid_wkt(c)} for c in cells]
         db.session.execute(UPSERT, rows)
+        removed = db.session.execute(text("DELETE FROM h3_cells WHERE NOT (cell = ANY(:cells))"),
+                                     {"cells": list(cells)}).rowcount
         db.session.commit()
+        if removed:
+            print(f"removed {removed} cells outside the {app.config['RADIUS_KM']} km circle")
         refresh_static_features()
         print(f"seeded {len(rows)} res-{res} cells "
               f"({len({r['parent'] for r in rows})} res-{area_res} area cells)")

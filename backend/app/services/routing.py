@@ -11,8 +11,8 @@ file. Here it runs on what the backend already has, with its code unchanged:
 * risk: the risk model's heatmap for the requested date (risk_model.heatmap,
   memoised per date) wrapped in pathfinding.risk.RiskGrid's interface.
 
-The graph covers the risk model's area plus a margin, since risk is unknown (a
-neutral 0.5) outside it anyway.
+The graph covers the study circle (RADIUS_KM, the same 5 miles as the risk model)
+plus ROAD_MARGIN_KM.
 """
 import datetime as dt
 import json
@@ -28,7 +28,6 @@ from ..db_utils import fetch_all
 from . import risk_model
 
 log = logging.getLogger(__name__)
-GRAPH_MARGIN_M = 1500.0     # walk graph = model circle + this margin
 MAX_SNAP_M = 300.0          # start/end farther than this from a walkable street -> 400
 MAX_TRIP_KM = 12.0          # straight-line cap per request (planner cost grows with distance)
 
@@ -40,9 +39,11 @@ class RouteError(ValueError):
     """Bad request for routing (outside the area, too far from a street, ...)."""
 
 
-def _model_area():
-    from algorithm.common import config
-    return config.CENTER, config.RADIUS_M
+def _graph_area():
+    """(center, radius_m) of the walk graph: study circle + ROAD_MARGIN_KM."""
+    from flask import current_app
+    c = current_app.config
+    return (c["USC_LAT"], c["USC_LNG"]), (c["RADIUS_KM"] + c["ROAD_MARGIN_KM"]) * 1000
 
 
 def explode_edges(geometries):
@@ -85,8 +86,7 @@ def walk_graph():
                 from pathfinding.graph import WalkGraph
 
                 t = time.time()
-                (lat0, lon0), radius = _model_area()
-                r = radius + GRAPH_MARGIN_M
+                (lat0, lon0), r = _graph_area()
                 dlat = r / 111_320.0
                 dlon = r / (111_320.0 * math.cos(math.radians(lat0)))
                 rows = fetch_all("""
