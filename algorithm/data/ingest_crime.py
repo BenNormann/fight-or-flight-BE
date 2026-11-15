@@ -1,7 +1,10 @@
 """Pull LAPD crime incidents for the USC area into SQLite (data/crime.db).
 
 Usage (from the repo root):
-    python -m data.ingest_crime
+    python -m algorithm.data.ingest_crime
+
+Pulls every incident inside config.RADIUS_MILES of USC for 2020-2024
+(~550k rows for 10 miles, ~5 min). Each run is a full refresh.
 
 Source: LA City Open Data, "Crime Data from 2020 to Present"
 (Socrata dataset 2nrs-mtv8, https://data.lacity.org/resource/2nrs-mtv8.json).
@@ -11,11 +14,12 @@ import datetime as dt
 import os
 import sqlite3
 import sys
+import time
 
 import h3
 import requests
 
-from algorithm.common import config
+from algorithm.common import config, geo
 from algorithm.common.severity import severity_tier
 
 URL = "https://data.lacity.org/resource/2nrs-mtv8.json"
@@ -56,8 +60,16 @@ def fetch_pages():
     while True:
         params = {"$select": FIELDS, "$where": where, "$order": "dr_no",
                   "$limit": PAGE, "$offset": offset}
-        r = requests.get(URL, params=params, headers=headers, timeout=180)
-        r.raise_for_status()
+        for attempt in range(4):
+            try:
+                r = requests.get(URL, params=params, headers=headers, timeout=300)
+                r.raise_for_status()
+                break
+            except requests.RequestException as e:
+                if attempt == 3:
+                    raise
+                print(f"  retrying page at offset {offset}: {e}", file=sys.stderr)
+                time.sleep(5 * (attempt + 1))
         rows = r.json()
         if not rows:
             return
@@ -72,6 +84,8 @@ def to_record(row):
     except (KeyError, ValueError, TypeError):
         return None
     if lat == 0 or lon == 0:  # LAPD uses 0,0 for redacted locations
+        return None
+    if not geo.in_radius(lat, lon):  # API query is the bounding box; keep the circle
         return None
     date = dt.date.fromisoformat(row["date_occ"][:10])
     t = int(row.get("time_occ") or 0)
@@ -89,6 +103,7 @@ def main():
     config.DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(config.DB_PATH)
     conn.executescript(SCHEMA)
+    conn.execute("DELETE FROM incidents")  # full refresh: the area may have changed
     total = 0
     for page in fetch_pages():
         recs = [r for r in map(to_record, page) if r]
@@ -98,7 +113,8 @@ def main():
     conn.execute("INSERT OR REPLACE INTO ingest_meta VALUES ('source', ?)", (URL,))
     conn.execute("INSERT OR REPLACE INTO ingest_meta VALUES ('fetched_at', ?)",
                  (dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),))
-    conn.execute("INSERT OR REPLACE INTO ingest_meta VALUES ('bbox', ?)", (str(config.BBOX),))
+    conn.execute("INSERT OR REPLACE INTO ingest_meta VALUES ('area', ?)",
+                 (f"{config.RADIUS_MILES} miles around {config.CENTER}",))
     conn.commit()
     n, lo, hi = conn.execute(
         "SELECT COUNT(*), MIN(date_occ), MAX(date_occ) FROM incidents").fetchone()
