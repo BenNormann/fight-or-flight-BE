@@ -147,7 +147,7 @@ def test_not_configured_redirects_with_unavailable():
     f"{FE}@evil.com/",
     "javascript:alert(1)",
     "http://localhost:5174/",
-    f"{FE}/\evil.com",
+    f"{FE}/\\evil.com",
     f"{FE}/x\nSet-Cookie: a=b",
 ])
 def test_next_must_be_on_an_allowed_origin(setup, bad):
