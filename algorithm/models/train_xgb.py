@@ -12,15 +12,13 @@ Split is by time, never random:
     extra  2024                 (out-of-time check; LAPD reporting changed in 2024)
 
 Outputs (models/artifacts/): xgb_risk.ubj, model_meta.json, metrics.json,
-and plots + model_report.md in notebooks/.
+and plots in notebooks/ (calibration.png, shap_summary.png, shap_importance.png).
 """
 import argparse
 import datetime as dt
 import json
 import time
 
-import matplotlib
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -28,7 +26,7 @@ import xgboost as xgb
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
 
-from algorithm.common import config
+from algorithm.common import config, geo
 from algorithm.features.build_dataset import FEATURES, History
 
 
@@ -36,6 +34,12 @@ def prior_correct(p, neg_rate):
     """Undo negative down-sampling: odds_true = odds_sampled * neg_rate."""
     p = np.clip(p, 1e-7, 1 - 1e-7)
     return p * neg_rate / (p * neg_rate + (1 - p))
+
+
+def monotone_constraints():
+    """+1 for crime-history features and blue-light distance
+    (config.MONOTONE_INCREASING), 0 otherwise."""
+    return "(" + ",".join("1" if f in config.MONOTONE_INCREASING else "0" for f in FEATURES) + ")"
 
 
 def weighted_quantiles(x, w, qs):
@@ -83,6 +87,7 @@ def main():
     ap.add_argument("--skip-sklearn", action="store_true")
     args = ap.parse_args()
     t0 = time.time()
+    plt.switch_backend("Agg")  # plots go to files when run as a script
 
     print("Loading history from", config.DB_PATH)
     hist = History()
@@ -98,7 +103,7 @@ def main():
         n_estimators=2000, learning_rate=0.03, max_depth=4, min_child_weight=20,
         subsample=0.8, colsample_bytree=0.8, reg_lambda=1.0, tree_method="hist",
         eval_metric="logloss", early_stopping_rounds=150, random_state=config.SEED,
-        n_jobs=-1,
+        n_jobs=-1, monotone_constraints=monotone_constraints(),
     )
     model.fit(tr[FEATURES], tr["y"], eval_set=[(va[FEATURES], va["y"])], verbose=False)
     print(f"XGBoost best iteration {model.best_iteration} ({time.time() - t0:.0f}s)")
@@ -125,12 +130,15 @@ def main():
               f"(scored {len(g):,} rows)")
         p = prior_correct(model.predict_proba(g[FEATURES])[:, 1], neg_rate)
         res = {"xgboost": evaluate(y, p, "XGBoost", w)}
+        # What the API serves: model probability x blue-light factor.
+        p_served = p * geo.bluelight_factor(g["dist_bluelight_m"].to_numpy())
+        res["xgboost_served"] = evaluate(y, p_served, "XGBoost + blue-light factor", w)
         if gbc is not None:
             pg = prior_correct(gbc.predict_proba(g[FEATURES])[:, 1], neg_rate)
             res["sklearn_gbc"] = evaluate(y, pg, "sklearn GradientBoosting", w)
         # Naive baseline: rank by last-12-month count in that cell at that hour +/-1
         res["baseline_hourband"] = evaluate(
-            y, g["cell_hourband_365d"].to_numpy() + 1e-3 * g["cell_90d"].to_numpy(),
+            y, g["cell_hourband_365d"].to_numpy() + 1e-3 * g["cell_rate_all"].to_numpy(),
             "Baseline (past-year count)", w, probabilistic=False)
         # Heatmap-level check: does the model rank (cell, hour-of-day) slots the
         # way the year actually played out? Spearman of mean predicted risk vs
@@ -144,13 +152,14 @@ def main():
         res["xgboost"]["calibration"] = {"mean_pred": mean_pred, "observed": observed}
         metrics[split] = res
         if split == "test_2023":
-            test_probs, test_w, test_frame = p, w, g
+            test_probs, test_w, test_frame = p_served, w, g
 
     # ---- Save model + metadata ------------------------------------------------
     config.ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
     model.save_model(config.MODEL_PATH)
     # Reference distribution so a raw probability can be turned into a 0-1
-    # *relative* risk (percentile among all covered cell-hours in 2023).
+    # *relative* risk (percentile among all covered cell-hours in 2023), using
+    # the served probability (with the blue-light factor) so risk is consistent.
     qs = weighted_quantiles(test_probs, test_w, np.linspace(0, 1, 101)).tolist()
     meta = {
         "features": FEATURES, "target": args.target, "neg_rate": neg_rate,
@@ -159,6 +168,9 @@ def main():
         "covered_cells": len(hist.cells), "no_data_cells": len(hist.no_data_cells),
         "data_start": config.DATA_START, "data_end": config.DATA_END,
         "train_end": config.TRAIN_END, "risk_quantiles": qs,
+        "half_life_days": config.HALF_LIFE_DAYS, "tod_sigma_hours": config.TOD_SIGMA_HOURS,
+        "bluelight": {"max_reduction": config.BLUELIGHT_MAX_REDUCTION,
+                      "range_m": config.BLUELIGHT_RANGE_M},
         "trained_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
     }
     config.META_PATH.write_text(json.dumps(meta, indent=2))
