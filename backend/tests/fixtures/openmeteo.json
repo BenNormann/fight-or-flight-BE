@@ -1,0 +1,6 @@
+[
+  {"latitude": 34.0, "longitude": -118.3, "current": {"time": "2026-11-14T22:15", "interval": 900,
+   "temperature_2m": 19.4, "relative_humidity_2m": 55, "precipitation": 0.0, "cloud_cover": 20, "wind_speed_10m": 9.1}},
+  {"latitude": 34.1, "longitude": -118.2, "current": {"time": "2026-11-14T22:15", "interval": 900,
+   "temperature_2m": 18.9, "relative_humidity_2m": 58, "precipitation": 0.0, "cloud_cover": 25, "wind_speed_10m": 7.4}}
+]
