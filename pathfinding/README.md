@@ -95,6 +95,16 @@ res["safe"].summary()       # length_m, detour_pct, mean_risk, max_risk, n_phone
 res["shortest"].summary()
 ```
 
+## Zero-risk zones (USC campus and USC Village)
+
+Every H3 cell whose centre is inside the USC University Park Campus outline
+(Vermont, Jefferson, Figueroa, Exposition) or the USC Village outline
+(McClintock, 30th St, Hoover, Jefferson) scores risk 0 at every hour, whatever
+the cache says. The outlines are in `campus.py` (`ZERO_RISK_ZONES`), traced from
+the OSM street centrelines in the cached walk graph. The cells are recomputed at
+the risk cache's resolution, so it works on res 9 and res 10 without changes.
+`python -m pathfinding.campus` lists the cells it zeroes.
+
 Limits: risk is per H3 cell (the resolution follows `config.H3_RES` and the
 cache, so it changes when the model does), so it can't tell the two sides of
 a street apart; the risk cache is for one date (rebuild it daily); the OSM
