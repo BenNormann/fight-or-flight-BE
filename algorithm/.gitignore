@@ -11,4 +11,5 @@ venv/
 
 # data + training artifacts (regenerate with the scripts)
 data/*.db
+data/*.xz
 models/artifacts/dataset.parquet
